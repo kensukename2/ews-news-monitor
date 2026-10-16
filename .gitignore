@@ -1,0 +1,18 @@
+# Secrets
+.env
+*.key
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Local pipeline state (lives on the `data` branch, not on main)
+state/
+site/ews_news/data/
+
+# OS / editor
+.DS_Store
+.vscode/
+.claude/
