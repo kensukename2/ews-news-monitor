@@ -1,20 +1,106 @@
 # News sources, grouped by language.
 #
 # Fields:
-#   id         unique short identifier (used in logs and the database)
-#   name       display name
-#   type       rss | gdelt | claude_search | reliefweb
-#   url        feed URL (rss only)
-#   language   en | ja | es  (for "international" sources: the language requested)
-#   prefilter  strict  = keyword rules must match (broad feeds, e.g. all NHK news)
-#              loose   = title/snippet needs at least one warning or hazard term
-#              relaxed = only exclude rules apply (sources that are already
-#                        keyword-searched by a model, e.g. Claude web search)
+#   id           unique short identifier (used in logs and the database)
+#   name         display name
+#   type         rss          RSS/Atom feed (preferred)
+#                gdelt        GDELT DOC API, queries from config/languages/<lang>.yaml
+#                claude_search  Claude web search, queries from config/languages/<lang>.yaml
+#                html_links   news list page of a site without a feed (see link_pattern)
+#                jma_press    気象庁 press release list
+#   url          feed or page URL
+#   language     en | ja | es
+#   prefilter    strict  = keyword rules must match (broad feeds, e.g. all NHK news)
+#                loose   = title/snippet needs at least one warning or hazard term
+#                relaxed = only exclude rules apply (sources that are already
+#                          keyword-searched by a model, e.g. Claude web search)
+#   require_any  optional list: keep only items containing one of these words
+#   exclude_any  optional list: drop items containing one of these words
+#   link_pattern html_links only: regular expression matched against link paths
+#   strip_pattern html_links only: optional regex removed from link titles
 #   agency_type  NMHS | RSMC | other_national_agency | international | NGO | media
-#   enabled    true / false
-#   notes      free text (e.g. why a source is disabled)
+#   enabled      true / false
+#   notes        free text (e.g. why a source is disabled)
+#
+# Test all feeds with:  python -m ews_news check-sources --all
 
-international: []
+international:
+  - id: gdacs
+    name: GDACS
+    type: rss
+    url: https://www.gdacs.org/xml/rss.xml
+    language: en
+    prefilter: relaxed
+    require_any: [orange, red]          # skip routine "Green" notifications
+    agency_type: international
+    enabled: true
+
+  - id: reliefweb_ew_en
+    name: ReliefWeb ("early warning")
+    type: rss
+    url: https://reliefweb.int/updates/rss.xml?search=%22early%20warning%22
+    language: en
+    prefilter: loose
+    agency_type: international
+    enabled: true
+
+  - id: reliefweb_ew_es
+    name: ReliefWeb ("alerta temprana")
+    type: rss
+    url: https://reliefweb.int/updates/rss.xml?search=%22alerta%20temprana%22
+    language: es
+    prefilter: loose
+    agency_type: international
+    enabled: true
+
+  - id: reliefweb_api
+    name: ReliefWeb API
+    type: reliefweb
+    language: en
+    agency_type: international
+    enabled: false
+    notes: "API requires an approved appname (https://apidoc.reliefweb.int/parameters#appname). RSS search feeds above are used meanwhile."
+
+  - id: preventionweb
+    name: PreventionWeb
+    type: rss
+    url: https://www.preventionweb.net/rss.xml
+    language: en
+    prefilter: loose
+    agency_type: international
+    enabled: true
+
+  - id: undrr
+    name: UNDRR news
+    type: rss
+    url: https://www.undrr.org/rss.xml
+    language: en
+    prefilter: loose
+    agency_type: international
+    enabled: true
+
+  - id: wmo_press
+    name: WMO press releases
+    type: html_links
+    url: https://wmo.int/news/media-centre
+    link_pattern: '^/news/media-centre/(?!information-journalists)[a-z0-9-]{15,}'
+    strip_pattern: '^Press Release \d{1,2} \w+ \d{4}\s*'
+    language: en
+    prefilter: loose
+    agency_type: international
+    enabled: true
+    notes: "No RSS feed; also covers Early Warnings for All announcements."
+
+  - id: wmo_news
+    name: WMO news
+    type: html_links
+    url: https://wmo.int/news
+    link_pattern: '^/media/news/[a-z0-9-]{10,}'
+    strip_pattern: '^News \d{1,2} \w+ \d{4}\s*'
+    language: en
+    prefilter: loose
+    agency_type: international
+    enabled: true
 
 en:
   - id: gdelt_en
@@ -33,7 +119,150 @@ en:
     agency_type: media
     enabled: true
 
+  - id: noaa_news
+    name: NOAA / US National Weather Service news
+    type: rss
+    url: https://www.noaa.gov/rss.xml
+    language: en
+    prefilter: loose
+    agency_type: NMHS
+    enabled: true
+
+  - id: metoffice_news
+    name: UK Met Office news
+    type: html_links
+    url: https://www.metoffice.gov.uk/about-us/news-and-media/media-centre/weather-and-climate-news
+    link_pattern: '/weather-and-climate-news/20\d\d/'
+    strip_pattern: '^Latest\s+'
+    language: en
+    prefilter: loose
+    agency_type: NMHS
+    enabled: true
+
+  - id: pagasa_press
+    name: PAGASA press releases
+    type: html_links
+    url: https://www.pagasa.dost.gov.ph/press-release
+    link_pattern: '^/press-release/\d+'
+    language: en
+    prefilter: loose
+    agency_type: NMHS
+    enabled: true
+
+  - id: kmd_news
+    name: Kenya Meteorological Department news
+    type: html_links
+    url: https://meteo.go.ke/news
+    link_pattern: '^/news/[^/]+/?$'
+    language: en
+    prefilter: loose
+    agency_type: NMHS
+    enabled: true
+
+  - id: icpac_news
+    name: ICPAC news
+    type: html_links
+    url: https://www.icpac.net/news/
+    link_pattern: '^/news/[^/]+/$'
+    language: en
+    prefilter: loose
+    agency_type: international
+    enabled: true
+
+  - id: asmc
+    name: ASEAN Specialised Meteorological Centre
+    type: rss
+    url: https://asmc.asean.org/feed/
+    language: en
+    prefilter: loose
+    agency_type: RSMC
+    enabled: true
+
+  - id: cimh_rcc
+    name: CIMH Caribbean Regional Climate Centre
+    type: rss
+    url: https://rcc.cimh.edu.bb/feed/
+    language: en
+    prefilter: loose
+    agency_type: international
+    enabled: true
+
+  - id: bbc_world
+    name: BBC News World
+    type: rss
+    url: https://feeds.bbci.co.uk/news/world/rss.xml
+    language: en
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: bbc_science
+    name: BBC News Science & Environment
+    type: rss
+    url: https://feeds.bbci.co.uk/news/science_and_environment/rss.xml
+    language: en
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: inquirer
+    name: Philippine Daily Inquirer
+    type: rss
+    url: https://newsinfo.inquirer.net/feed
+    language: en
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  # --- listed but not accessible (checked 2026-10-16); covered by GDELT / web search
+  - {id: imd, name: India Meteorological Department / RSMC New Delhi, type: rss, language: en, enabled: false,
+     notes: "No RSS feed or readable press list found (press page 404)."}
+  - {id: bmd, name: Bangladesh Meteorological Department, type: rss, language: en, enabled: false,
+     notes: "No RSS feed or news list on bmd.gov.bd."}
+  - {id: nhc, name: NHC / RSMC Miami, type: rss, language: en, enabled: false,
+     notes: "RSS feeds exist but carry routine advisories/outlooks only (excluded by scope)."}
+  - {id: bom, name: Australian Bureau of Meteorology, type: rss, language: en, enabled: false,
+     notes: "media.bom.gov.au and bom.gov.au/rss return HTTP 403 to automated clients."}
+  - {id: fiji_met, name: Fiji Meteorological Service / RSMC Nadi, type: rss, language: en, enabled: false,
+     notes: "No news list; warnings pages only; feed URL returns HTTP 500."}
+  - {id: acmad, name: ACMAD, type: rss, language: en, enabled: false,
+     notes: "No feed; news pages return 404."}
+  - {id: reuters, name: Reuters, type: rss, language: en, enabled: false,
+     notes: "robots.txt disallows automated access."}
+  - {id: ap, name: Associated Press, type: rss, language: en, enabled: false,
+     notes: "HTTP 403 for feeds."}
+  - {id: dhaka_tribune, name: Dhaka Tribune, type: rss, language: en, enabled: false,
+     notes: "HTTP 403/404 for feeds."}
+
 ja:
+  - id: jma_press
+    name: 気象庁 報道発表 (JMA, incl. RSMC Tokyo)
+    type: jma_press
+    url: https://www.jma.go.jp/jma/press_list.js
+    language: ja
+    prefilter: loose
+    agency_type: NMHS
+    enabled: true
+
+  - id: nhk_news
+    name: NHK ニュース 主要
+    type: rss
+    url: https://news.web.nhk/n-data/conf/na/rss/cat0.xml
+    language: ja
+    prefilter: strict
+    agency_type: media
+    enabled: true
+    notes: "Moved from www3.nhk.or.jp (frozen since 2026-08-08) to news.web.nhk."
+
+  - id: nhk_society
+    name: NHK ニュース 社会
+    type: rss
+    url: https://news.web.nhk/n-data/conf/na/rss/cat1.xml
+    language: ja
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
   - id: asahi_news
     name: 朝日新聞 (Asahi Shimbun)
     type: rss
@@ -43,15 +272,22 @@ ja:
     agency_type: media
     enabled: true
 
-  - id: nhk_news
-    name: NHK ニュース
+  - id: mainichi_news
+    name: 毎日新聞 (Mainichi Shimbun)
     type: rss
-    url: https://www3.nhk.or.jp/rss/news/cat0.xml
+    url: https://mainichi.jp/rss/etc/mainichi-flash.rss
     language: ja
     prefilter: strict
     agency_type: media
-    enabled: false
-    notes: "Feed frozen since 2026-08-08 (checked 2026-10-16)."
+    enabled: true
+
+  - id: gdelt_ja
+    name: GDELT (Japanese)
+    type: gdelt
+    language: ja
+    prefilter: relaxed
+    agency_type: media
+    enabled: true
 
   - id: websearch_ja
     name: Claude web search (Japanese)
@@ -60,6 +296,54 @@ ja:
     prefilter: relaxed
     agency_type: media
     enabled: true
+
+  - id: bousai
+    name: 内閣府 防災情報 記者発表
+    type: html_links
+    url: https://www.bousai.go.jp/
+    link_pattern: '^/pdf/\d{6}'
+    strip_pattern: '（PDF形式：[^）]*）'
+    language: ja
+    prefilter: loose
+    agency_type: other_national_agency
+    enabled: true
+
+  - id: fdma
+    name: 消防庁 報道発表
+    type: html_links
+    url: https://www.fdma.go.jp/pressrelease/houdou/
+    link_pattern: '^/pressrelease/houdou/items/'
+    language: ja
+    prefilter: strict
+    agency_type: other_national_agency
+    enabled: true
+
+  - id: mlit
+    name: 国土交通省 報道発表 (incl. 水管理・国土保全局)
+    type: rss
+    url: https://www.mlit.go.jp/index.rdf
+    language: ja
+    prefilter: strict
+    agency_type: other_national_agency
+    enabled: true
+
+  - id: jica_press
+    name: JICA ニュースリリース
+    type: html_links
+    url: https://www.jica.go.jp/information/press/index.html
+    link_pattern: '/information/press/20\d\d/'
+    strip_pattern: '^20\d\d\.\d{1,2}\.\d{1,2}\s*|\s*#\S+$'
+    language: ja
+    prefilter: strict
+    agency_type: international
+    enabled: true
+
+  - {id: adrc, name: アジア防災センター (ADRC), type: rss, language: ja, enabled: false,
+     notes: "www.adrc.asia fails TLS/SSL verification."}
+  - {id: kyodo, name: 共同通信 (Kyodo), type: rss, language: ja, enabled: false,
+     notes: "kyodo.co.jp feed carries corporate/PR items only; news via GDELT / web search."}
+  - {id: jma_xml, name: 気象庁 防災情報XML, type: rss, language: ja, enabled: false,
+     notes: "Machine-readable warning telegrams (routine warnings, excluded by scope)."}
 
 es:
   - id: gdelt_es
@@ -77,3 +361,167 @@ es:
     prefilter: relaxed
     agency_type: media
     enabled: true
+
+  - id: aemet_news
+    name: AEMET noticias
+    type: rss
+    url: https://www.aemet.es/es/rss/noticias.rss
+    language: es
+    prefilter: loose
+    agency_type: NMHS
+    enabled: true
+
+  - id: senamhi_pe
+    name: SENAMHI Perú noticias
+    type: html_links
+    url: https://www.gob.pe/institucion/senamhi/noticias
+    link_pattern: '/institucion/senamhi/noticias/\d+'
+    language: es
+    prefilter: loose
+    agency_type: NMHS
+    enabled: true
+
+  - id: ideam
+    name: IDEAM Colombia
+    type: rss
+    url: https://www.ideam.gov.co/rss.xml
+    language: es
+    prefilter: strict
+    agency_type: NMHS
+    enabled: true
+
+  - id: inamhi
+    name: INAMHI Ecuador
+    type: rss
+    url: https://www.inamhi.gob.ec/feed/
+    language: es
+    prefilter: loose
+    agency_type: NMHS
+    enabled: true
+
+  - id: imn_cr
+    name: IMN Costa Rica noticias
+    type: html_links
+    url: https://www.imn.ac.cr/noticias
+    link_pattern: '/web/imn/noticias/-/asset_publisher/'
+    language: es
+    prefilter: loose
+    agency_type: NMHS
+    enabled: true
+
+  - id: indeci
+    name: INDECI Perú noticias
+    type: html_links
+    url: https://www.gob.pe/institucion/indeci/noticias
+    link_pattern: '/institucion/indeci/noticias/\d+'
+    language: es
+    prefilter: loose
+    agency_type: other_national_agency
+    enabled: true
+
+  - id: cenepred
+    name: CENEPRED Perú noticias
+    type: html_links
+    url: https://www.gob.pe/institucion/cenepred/noticias
+    link_pattern: '/institucion/cenepred/noticias/\d+'
+    language: es
+    prefilter: loose
+    agency_type: other_national_agency
+    enabled: true
+
+  - id: ciifen
+    name: CIIFEN
+    type: rss
+    url: https://ciifen.org/feed/
+    language: es
+    prefilter: loose
+    agency_type: international
+    enabled: true
+
+  - id: elpais_america
+    name: El País América
+    type: rss
+    url: https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/america/portada
+    language: es
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: elpais_portada
+    name: El País (España)
+    type: rss
+    url: https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada
+    language: es
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: clarin
+    name: Clarín (Argentina) sociedad
+    type: rss
+    url: https://www.clarin.com/rss/sociedad/
+    language: es
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: larepublica_pe
+    name: La República (Perú) sociedad
+    type: rss
+    url: https://larepublica.pe/rss/sociedad.xml
+    language: es
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: eltiempo_co
+    name: El Tiempo (Colombia)
+    type: rss
+    url: https://www.eltiempo.com/rss/colombia.xml
+    language: es
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: biobio_cl
+    name: BioBioChile nacional
+    type: rss
+    url: https://feeds.feedburner.com/radiobiobio/NNeJ
+    language: es
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  # --- listed but not accessible (checked 2026-10-16); covered by GDELT / web search
+  - {id: smn_mx, name: SMN México / CONAGUA, type: rss, language: es, enabled: false,
+     notes: "smn.conagua.gob.mx robots.txt disallows; gob.mx/conagua RSS returns HTTP 500."}
+  - {id: cenapred, name: CENAPRED (México), type: rss, language: es, enabled: false,
+     notes: "gob.mx RSS returns HTTP 500; list page is rendered by JavaScript."}
+  - {id: smn_ar, name: SMN Argentina, type: rss, language: es, enabled: false,
+     notes: "HTTP 403 to automated clients."}
+  - {id: dmc_cl, name: Dirección Meteorológica de Chile, type: rss, language: es, enabled: false,
+     notes: "Connection refused/timeout from Europe."}
+  - {id: senapred, name: SENAPRED (Chile), type: rss, language: es, enabled: false,
+     notes: "No feed; news list rendered by JavaScript."}
+  - {id: inumet, name: INUMET Uruguay, type: rss, language: es, enabled: false,
+     notes: "No feed; news page 404."}
+  - {id: senamhi_bo, name: SENAMHI Bolivia, type: rss, language: es, enabled: false,
+     notes: "No feed; news list has no readable article links."}
+  - {id: insivumeh, name: INSIVUMEH Guatemala, type: rss, language: es, enabled: false,
+     notes: "Site times out."}
+  - {id: ineter, name: INETER Nicaragua, type: rss, language: es, enabled: false,
+     notes: "TLS/SSL certificate error."}
+  - {id: insmet, name: INSMET Cuba, type: rss, language: es, enabled: false,
+     notes: "Site times out."}
+  - {id: onamet, name: ONAMET República Dominicana, type: rss, language: es, enabled: false,
+     notes: "HTTP 403 to automated clients."}
+  - {id: ungrd, name: UNGRD Colombia, type: rss, language: es, enabled: false,
+     notes: "No feed; site times out."}
+  - {id: copeco, name: COPECO Honduras, type: rss, language: es, enabled: false,
+     notes: "No feed; news page 404."}
+  - {id: cepredenac, name: CEPREDENAC, type: rss, language: es, enabled: false,
+     notes: "No feed; news page 404."}
+  - {id: efe, name: Agencia EFE, type: rss, language: es, enabled: false,
+     notes: "HTTP 403 to automated clients."}
+  - {id: eluniversal_mx, name: El Universal (México), type: rss, language: es, enabled: false,
+     notes: "robots.txt disallows automated access."}

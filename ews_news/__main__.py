@@ -6,6 +6,7 @@
     python -m ews_news publish             # rebuild the JSON for the page
     python -m ews_news recluster           # rebuild all stories (after changing cluster settings)
     python -m ews_news report              # last run summary and spending
+    python -m ews_news check-sources       # test every RSS feed in config/sources.yaml
     python -m ews_news daily-gate          # exit 0 only at 05:xx Europe/Zurich (for CI)
 """
 
@@ -34,6 +35,8 @@ def main(argv=None):
     sub.add_parser("publish")
     sub.add_parser("recluster")
     sub.add_parser("report")
+    cs = sub.add_parser("check-sources")
+    cs.add_argument("--all", action="store_true", help="include disabled sources")
     g = sub.add_parser("daily-gate")
     g.add_argument("--hour", type=int, default=5)
     args = p.parse_args(argv)
@@ -45,6 +48,13 @@ def main(argv=None):
         now = datetime.now(ZoneInfo(config.settings["timezone"]))
         print(f"local time {now:%Y-%m-%d %H:%M %Z}")
         sys.exit(0 if now.hour == args.hour else 1)
+
+    if args.cmd == "check-sources":
+        from .check import check_sources
+        for r in check_sources(config, args.all):
+            print(f"{r['status']:8} {r['language']} {r['id']:22} entries={r['entries']:<4} "
+                  f"newest={(r['newest'] or '-')[:10]}  {r['detail']}")
+        return
 
     db.restore(config.path("database"), config.path("db_dump"))
 
