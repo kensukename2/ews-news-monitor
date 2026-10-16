@@ -1,0 +1,96 @@
+# Japanese language configuration.
+# Japanese has no spaces between words, so matching is plain substring
+# matching (word_boundaries: false) after NFKC normalisation, which also
+# converts full-width letters/digits to half-width.
+code: ja
+name: 日本語 (Japanese)
+word_boundaries: false
+fold_accents: false
+
+prefilter:
+  strong_terms:
+    - 早期警戒
+    - 早期警報
+    - 特別警報
+    - 線状降水帯
+    - 指定河川洪水予報
+    - 土砂災害警戒情報
+    - 緊急安全確保
+    - 津波警報
+    - 大津波警報
+    - 熱中症警戒アラート
+    - 熱中症特別警戒アラート
+    - 防災気象情報
+    - 記録的短時間大雨情報
+    - 氾濫危険情報
+    - 氾濫発生情報
+    - 竜巻注意情報
+    - 緊急速報メール
+    - 事前避難
+    - 予防的避難
+    - 早期警戒システム
+    - 緊急地震速報
+    - 噴火警戒レベル
+    - 防災行政無線
+    - エリアメール
+    - Jアラート
+  warning_terms:
+    - 警報
+    - 注意報
+    - 警戒
+    - 避難指示
+    - 高齢者等避難
+    - 避難
+    - 予報
+    - 気象庁
+    - 気象台
+    - 発表
+    - 呼びかけ
+    - 防災
+    - 速報
+    - 配信
+    - 伝達
+  hazard_terms:
+    - 台風
+    - 大雨
+    - 豪雨
+    - 洪水
+    - 氾濫
+    - 浸水
+    - 高潮
+    - 土砂災害
+    - 土砂崩れ
+    - がけ崩れ
+    - 津波
+    - 猛暑
+    - 熱中症
+    - 干ばつ
+    - 渇水
+    - 竜巻
+    - 突風
+    - 雷
+    - 大雪
+    - 暴風
+    - 寒波
+    - 山火事
+    - 林野火災
+    - 黄砂
+    - サイクロン
+    - ハリケーン
+    - 地震
+    - 噴火
+  exclude_terms:
+    - の警報・注意報     # routine per-municipality listing pages
+    - 株価
+    - 決算
+    - 交通安全
+
+gdelt:
+  sourcelang: japanese
+  # GDELT matches English machine translations, so keywords are in English.
+  queries:
+    - '(warning OR evacuation OR "early warning" OR "emergency warning") (typhoon OR "heavy rain" OR flood OR landslide OR tsunami OR heatstroke)'
+
+web_search:
+  queries:
+    - "特別警報 OR 避難指示 OR 線状降水帯 気象庁 発表 ニュース"

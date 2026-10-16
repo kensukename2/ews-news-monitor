@@ -1,0 +1,79 @@
+# News sources, grouped by language.
+#
+# Fields:
+#   id         unique short identifier (used in logs and the database)
+#   name       display name
+#   type       rss | gdelt | claude_search | reliefweb
+#   url        feed URL (rss only)
+#   language   en | ja | es  (for "international" sources: the language requested)
+#   prefilter  strict  = keyword rules must match (broad feeds, e.g. all NHK news)
+#              loose   = title/snippet needs at least one warning or hazard term
+#              relaxed = only exclude rules apply (sources that are already
+#                        keyword-searched by a model, e.g. Claude web search)
+#   agency_type  NMHS | RSMC | other_national_agency | international | NGO | media
+#   enabled    true / false
+#   notes      free text (e.g. why a source is disabled)
+
+international: []
+
+en:
+  - id: gdelt_en
+    name: GDELT (English)
+    type: gdelt
+    language: en
+    prefilter: loose
+    agency_type: media
+    enabled: true
+
+  - id: websearch_en
+    name: Claude web search (English)
+    type: claude_search
+    language: en
+    prefilter: relaxed
+    agency_type: media
+    enabled: true
+
+ja:
+  - id: asahi_news
+    name: 朝日新聞 (Asahi Shimbun)
+    type: rss
+    url: https://www.asahi.com/rss/asahi/newsheadlines.rdf
+    language: ja
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: nhk_news
+    name: NHK ニュース
+    type: rss
+    url: https://www3.nhk.or.jp/rss/news/cat0.xml
+    language: ja
+    prefilter: strict
+    agency_type: media
+    enabled: false
+    notes: "Feed frozen since 2026-08-08 (checked 2026-10-16)."
+
+  - id: websearch_ja
+    name: Claude web search (Japanese)
+    type: claude_search
+    language: ja
+    prefilter: relaxed
+    agency_type: media
+    enabled: true
+
+es:
+  - id: gdelt_es
+    name: GDELT (Spanish)
+    type: gdelt
+    language: es
+    prefilter: loose
+    agency_type: media
+    enabled: true
+
+  - id: websearch_es
+    name: Claude web search (Spanish)
+    type: claude_search
+    language: es
+    prefilter: relaxed
+    agency_type: media
+    enabled: true

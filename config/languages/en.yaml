@@ -1,0 +1,113 @@
+# English language configuration.
+# All matching is case-insensitive substring matching after Unicode NFKC
+# normalisation. With word_boundaries: true, terms must match whole words.
+code: en
+name: English
+word_boundaries: true
+fold_accents: false
+
+prefilter:
+  # Keep an item if it contains ANY strong term, or at least one warning term
+  # AND at least one hazard term. Items with an exclude term are dropped.
+  strong_terms:
+    - early warning
+    - early warnings
+    - warning system
+    - impact-based forecast
+    - cell broadcast
+    - anticipatory action
+    - evacuated ahead
+    - evacuated before
+    - pre-emptive evacuation
+    - preemptive evacuation
+    - red alert
+    - orange alert
+    - tsunami warning
+    - hurricane warning
+    - cyclone warning
+    - flood warning
+    - heat warning
+    - storm surge warning
+    - early action protocol
+    - CAP alert
+  warning_terms:
+    - warning
+    - warnings
+    - warned
+    - alert
+    - alerts
+    - advisory
+    - bulletin
+    - forecast
+    - forecasters
+    - evacuate
+    - evacuated
+    - evacuation
+    - evacuations
+    - no casualties
+    - zero casualties
+    - lives saved
+    - met office
+    - meteorological
+    - weather service
+    - preparedness
+  hazard_terms:
+    - cyclone
+    - typhoon
+    - hurricane
+    - tropical storm
+    - flood
+    - floods
+    - flooding
+    - flash flood
+    - storm surge
+    - heatwave
+    - heat wave
+    - extreme heat
+    - drought
+    - thunderstorm
+    - severe storm
+    - tornado
+    - hailstorm
+    - landslide
+    - landslides
+    - mudslide
+    - tsunami
+    - wildfire
+    - bushfire
+    - forest fire
+    - cold wave
+    - cold snap
+    - blizzard
+    - snowstorm
+    - dust storm
+    - sandstorm
+    - heavy rain
+    - torrential rain
+    - monsoon
+    - glacial lake
+    - GLOF
+    - earthquake
+    - volcano
+    - eruption
+  exclude_terms:
+    - stock market
+    - earnings call
+    - profit warning
+    - cybersecurity
+    - malware
+    - travel advisory for crime
+    - recession warning
+    - box office
+
+# GDELT DOC API query (GDELT searches English text, including its machine
+# translations of non-English news).
+gdelt:
+  sourcelang: english
+  queries:
+    - '("early warning" OR "warning issued" OR "red alert" OR "evacuated ahead" OR "anticipatory action" OR "cell broadcast") (flood OR cyclone OR typhoon OR hurricane OR heatwave OR landslide OR tsunami OR storm)'
+
+# Queries given to Claude web search (one search per query per run).
+web_search:
+  queries:
+    - "early warning issued flood OR cyclone OR hurricane OR typhoon meteorological department evacuation"

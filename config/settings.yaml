@@ -1,0 +1,40 @@
+# General pipeline settings. Paths are relative to the repository root.
+
+timezone: Europe/Zurich
+user_agent: "ews-news-monitor/0.1 (+https://knaito.xyz/ews_news)"
+
+paths:
+  database: state/ews.sqlite        # working SQLite database
+  db_dump: state/ews.sql            # text dump committed to the `data` branch
+  run_logs: state/logs              # one JSON log per run
+  site_data: site/ews_news/data     # JSON files read by the web page
+
+collect:
+  lookback_days: 3          # ignore items published earlier than this
+  request_timeout: 20       # seconds
+  min_seconds_per_host: 1.5 # politeness delay between requests to the same host
+  gdelt_min_interval: 6     # GDELT asks for max one request every 5 s
+
+classify:
+  model: claude-haiku-5-5
+  max_tokens: 1500
+  confidence_threshold: 0.6   # below this, items are flagged for review (never dropped)
+  max_items_per_run: 150      # safety cap; leftovers stay pending for the next run
+
+web_search:
+  model: claude-haiku-5-5
+  max_searches_per_query: 1   # each search costs $0.01
+
+budget:
+  monthly_usd: 5.0
+  # USD per million tokens / per search, used to log and cap spending.
+  prices:
+    claude-haiku-5-5: {input: 0.10, output: 0.50, cache_read: 0.01, cache_write: 0.125}
+  web_search_usd: 0.01
+
+cluster:
+  window_days: 7       # articles about the same event must be within this many days
+
+publish:
+  stories_per_month_file: true
+  stale_after_hours: 30   # page shows a warning if the last successful run is older

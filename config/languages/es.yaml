@@ -1,0 +1,98 @@
+# Spanish language configuration.
+# fold_accents: true means "inundacion" and "inundación" both match.
+code: es
+name: Español (Spanish)
+word_boundaries: true
+fold_accents: true
+
+prefilter:
+  strong_terms:
+    - alerta temprana
+    - alertas tempranas
+    - sistema de alerta temprana
+    - aviso meteorológico
+    - alerta roja
+    - alerta naranja
+    - evacuación preventiva
+    - evacuaciones preventivas
+    - acción anticipatoria
+    - acciones anticipatorias
+    - aviso de huracán
+    - alerta de tsunami
+    - aviso rojo
+    - nivel rojo
+    - nivel naranja
+  warning_terms:
+    - alerta
+    - alertas
+    - aviso
+    - avisos
+    - advertencia
+    - pronóstico
+    - pronostica
+    - boletín
+    - evacuación
+    - evacuaciones
+    - evacuados
+    - evacuar
+    - albergues
+    - protección civil
+    - defensa civil
+    - meteorológico
+    - meteorología
+    - sin víctimas
+    - preparación
+  hazard_terms:
+    - huracán
+    - tormenta tropical
+    - ciclón
+    - inundación
+    - inundaciones
+    - crecida
+    - desborde
+    - desbordamiento
+    - lluvias intensas
+    - lluvias fuertes
+    - fuertes lluvias
+    - aguacero
+    - ola de calor
+    - calor extremo
+    - sequía
+    - tormenta
+    - tornado
+    - granizo
+    - deslizamiento
+    - deslizamientos
+    - huaico
+    - huaicos
+    - alud
+    - tsunami
+    - marejada
+    - incendio forestal
+    - incendios forestales
+    - helada
+    - heladas
+    - ola de frío
+    - nevada
+    - frente frío
+    - DANA
+    - sismo
+    - terremoto
+    - erupción
+    - volcán
+  exclude_terms:
+    - alerta sanitaria
+    - alerta alimentaria
+    - bolsa de valores
+    - futbol
+    - fútbol
+    - alerta amber
+
+gdelt:
+  sourcelang: spanish
+  queries:
+    - '("early warning" OR "red alert" OR "orange alert" OR evacuation OR "preventive evacuation") (hurricane OR flood OR "heavy rain" OR landslide OR tsunami OR heatwave OR storm)'
+
+web_search:
+  queries:
+    - "alerta temprana OR alerta roja OR evacuación preventiva huracán OR inundación OR lluvias intensas servicio meteorológico"
