@@ -4,6 +4,7 @@
     python -m ews_news run --source nhk_news --source gdelt_en
     python -m ews_news run --no-classify   # collect + publish only (no API cost)
     python -m ews_news publish             # rebuild the JSON for the page
+    python -m ews_news recluster           # rebuild all stories (after changing cluster settings)
     python -m ews_news report              # last run summary and spending
     python -m ews_news daily-gate          # exit 0 only at 05:xx Europe/Zurich (for CI)
 """
@@ -17,7 +18,7 @@ from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
 
-from . import db, publish
+from . import cluster, db, publish
 from .config import load_config
 from .pipeline import run
 
@@ -31,6 +32,7 @@ def main(argv=None):
     r.add_argument("--no-collect", action="store_true")
     r.add_argument("--no-classify", action="store_true")
     sub.add_parser("publish")
+    sub.add_parser("recluster")
     sub.add_parser("report")
     g = sub.add_parser("daily-gate")
     g.add_argument("--hour", type=int, default=5)
@@ -57,6 +59,11 @@ def main(argv=None):
     if args.cmd == "publish":
         m = publish.publish(conn, config)
         print(f"published {m['total_stories']} stories ({m['new_today']} new today)")
+    elif args.cmd == "recluster":
+        n = cluster.recluster(conn, config)
+        m = publish.publish(conn, config)
+        db.dump(conn, config.path("db_dump"))
+        print(f"rebuilt {n} stories; published {m['total_stories']}")
     elif args.cmd == "report":
         last = conn.execute("SELECT * FROM runs ORDER BY id DESC LIMIT 1").fetchone()
         month = datetime.utcnow().strftime("%Y-%m-01")

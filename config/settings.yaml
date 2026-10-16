@@ -33,7 +33,9 @@ budget:
   web_search_usd: 0.01
 
 cluster:
-  window_days: 7       # articles about the same event must be within this many days
+  window_days: 7       # articles with the same event name/location: max days apart
+  similar_days: 3      # unnamed events matched by title similarity: max days apart
+  min_title_similarity: 0.3   # 0-1 overlap of English title words (higher = stricter)
 
 publish:
   stories_per_month_file: true

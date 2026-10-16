@@ -6,7 +6,9 @@ name and an English location for every article:
     are keyed on the name, regardless of hazard type;
   * unnamed events are keyed on hazard + country + location.
 Two articles join the same story if their keys match and their dates are
-within `cluster.window_days`.
+within `cluster.window_days`. Otherwise an article joins a story with the
+same hazard group and an overlapping country, within `cluster.similar_days`,
+whose English titles are similar enough (`cluster.min_title_similarity`).
 """
 
 import re
@@ -19,7 +21,19 @@ from .textutil import domain, normalize, utcnow
 _NAME_NOISE = re.compile(
     r"\b(super|severe|major|tropical|typhoon|hurricane|cyclone|cyclonic|storm|depression|"
     r"category \d|post|remnants?|of|the|ex|very|extremely|20\d\d)\b")
-_HAZARD_GROUP = {"flash_flood": "flood", "heavy_rain": "flood"}
+_HAZARD_GROUP = {"flash_flood": "flood", "heavy_rain": "flood", "storm_surge": "tropical_cyclone",
+                 "tsunami": "earthquake"}
+_STOPWORDS = set("""a an and are as at be by for from has have in into is it its of on or over
+the to was were will with after amid as new says said about after than that this their""".split())
+
+
+def title_tokens(text: str) -> set:
+    words = re.findall(r"[a-z0-9]+(?:\.[0-9]+)?", normalize(text or "", fold_accents=True))
+    return {w for w in words if w not in _STOPWORDS and (len(w) > 2 or w[0].isdigit())}
+
+
+def similarity(a: set, b: set) -> float:
+    return len(a & b) / len(a | b) if a and b else 0.0
 
 
 def event_key(c: dict) -> str:
@@ -46,9 +60,33 @@ def _within(a: str, b: str, days: int) -> bool:
     return abs(fa - fb) <= timedelta(days=days)
 
 
+def _similar_story(conn, c: dict, when: str, ccfg: dict):
+    """Find an existing story about the same unnamed event (see module docstring)."""
+    group = _HAZARD_GROUP.get(c["hazard"], c["hazard"])
+    countries = set(c.get("countries") or [])
+    tokens = title_tokens(c.get("title_en"))
+    best, best_sim = None, ccfg["min_title_similarity"]
+    rows = conn.execute(
+        "SELECT i.story_id, i.published_at, i.collected_at, cl.data_json FROM items i "
+        "JOIN classifications cl ON cl.item_id = i.id WHERE i.story_id IS NOT NULL").fetchall()
+    for r in rows:
+        m = db.loads(r["data_json"])
+        if _HAZARD_GROUP.get(m["hazard"], m["hazard"]) != group:
+            continue
+        if countries and not countries & set(m.get("countries") or []):
+            continue
+        if not _within(r["published_at"] or r["collected_at"], when, ccfg["similar_days"]):
+            continue
+        sim = similarity(tokens, title_tokens(m.get("title_en")))
+        if sim >= best_sim:
+            best, best_sim = r["story_id"], sim
+    return best
+
+
 def assign_stories(conn, config) -> int:
     """Attach every classified, unclustered, relevant (or review) item to a story."""
-    window = config.settings["cluster"]["window_days"]
+    ccfg = config.settings["cluster"]
+    window = ccfg["window_days"]
     rows = conn.execute(
         "SELECT i.*, c.data_json, c.relevant, c.review FROM items i "
         "JOIN classifications c ON c.item_id = i.id "
@@ -66,6 +104,8 @@ def assign_stories(conn, config) -> int:
                 story_id = s["id"]
                 break
         if story_id is None:
+            story_id = _similar_story(conn, c, when, ccfg)
+        if story_id is None:
             now = utcnow()
             cur = conn.execute(
                 "INSERT INTO stories (event_key, hazard, first_seen, last_updated, event_date, data_json)"
@@ -77,6 +117,14 @@ def assign_stories(conn, config) -> int:
         rebuild_story(conn, config, sid)
     conn.commit()
     return len(touched)
+
+
+def recluster(conn, config) -> int:
+    """Throw away all stories and rebuild them (after changing cluster settings)."""
+    conn.execute("UPDATE items SET story_id = NULL")
+    conn.execute("DELETE FROM stories")
+    conn.commit()
+    return assign_stories(conn, config)
 
 
 def _merge_outcome(outcomes) -> str:

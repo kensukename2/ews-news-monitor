@@ -116,3 +116,26 @@ def test_db_dump_and_restore(tmp_config):
     assert db.restore(tmp_config.path("database"), tmp_config.path("db_dump"))
     conn = db.connect(tmp_config.path("database"))
     assert conn.execute("SELECT title FROM items").fetchone()[0] == "台風で避難指示"
+
+
+def test_unnamed_event_joins_by_title_similarity(tmp_config):
+    conn = db.connect(tmp_config.path("database"))
+    src = {"id": "t", "prefilter": "relaxed"}
+    titles = [
+        ("https://a/1", "Japan mistakenly issues warning for magnitude 9.9 earthquake", "en", "Tokyo, Japan"),
+        ("https://b/2", "緊急地震速報、初の警報取り消し M9.9と過大推定", "ja", "Japan"),
+        ("https://c/3", "Kenya floods displace thousands", "en", "Nairobi, Kenya"),
+    ]
+    en_titles = ["Japan mistakenly issues warning for magnitude 9.9 earthquake",
+                 "Japan earthquake warning for magnitude 9.9 cancelled after overestimate",
+                 "Kenya floods displace thousands"]
+    for (url, title, lang, loc), title_en in zip(titles, en_titles):
+        store_item(conn, tmp_config, src, _raw(url, title, lang), "2000")
+        item_id = conn.execute("SELECT id FROM items WHERE url = ?", (url,)).fetchone()[0]
+        kenya = "Kenya" in title_en
+        save_classification(conn, item_id, "test", sample_classification(
+            language=lang, title_en=title_en, event_name=None, event_location=loc,
+            hazard="flood" if kenya else "earthquake", countries=["KE" if kenya else "JP"],
+            review=False))
+    assert cluster.assign_stories(conn, tmp_config) == 2
+    assert conn.execute("SELECT COUNT(*) FROM stories").fetchone()[0] == 2
