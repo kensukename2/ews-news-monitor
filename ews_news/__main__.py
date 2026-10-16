@@ -5,6 +5,7 @@
     python -m ews_news run --no-classify   # collect + publish only (no API cost)
     python -m ews_news publish             # rebuild the JSON for the page
     python -m ews_news recluster           # rebuild all stories (after changing cluster settings)
+    python -m ews_news recluster --use-claude   # ... asking Claude about unclear matches (small cost)
     python -m ews_news report              # last run summary and spending
     python -m ews_news check-sources       # test every RSS feed in config/sources.yaml
     python -m ews_news daily-gate          # exit 0 only at 05:xx Europe/Zurich (for CI)
@@ -33,7 +34,8 @@ def main(argv=None):
     r.add_argument("--no-collect", action="store_true")
     r.add_argument("--no-classify", action="store_true")
     sub.add_parser("publish")
-    sub.add_parser("recluster")
+    rc = sub.add_parser("recluster")
+    rc.add_argument("--use-claude", action="store_true")
     sub.add_parser("report")
     cs = sub.add_parser("check-sources")
     cs.add_argument("--all", action="store_true", help="include disabled sources")
@@ -70,7 +72,13 @@ def main(argv=None):
         m = publish.publish(conn, config)
         print(f"published {m['total_stories']} stories ({m['new_today']} new today)")
     elif args.cmd == "recluster":
-        n = cluster.recluster(conn, config)
+        matcher = None
+        if args.use_claude:
+            import anthropic
+            from .budget import Budget
+            from .matcher import StoryMatcher
+            matcher = StoryMatcher(config, Budget(conn, config.settings), anthropic.Anthropic())
+        n = cluster.recluster(conn, config, matcher)
         m = publish.publish(conn, config)
         db.dump(conn, config.path("db_dump"))
         print(f"rebuilt {n} stories; published {m['total_stories']}")

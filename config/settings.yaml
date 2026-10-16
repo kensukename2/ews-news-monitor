@@ -35,7 +35,7 @@ budget:
 cluster:
   window_days: 7       # articles with the same event name/location: max days apart
   similar_days: 3      # unnamed events matched by title similarity: max days apart
-  min_title_similarity: 0.3   # 0-1 overlap of English title words (higher = stricter)
+  min_title_similarity: 0.3   # fallback without Claude: 0-1 overlap of English title words
 
 publish:
   stories_per_month_file: true

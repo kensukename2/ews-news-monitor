@@ -6,17 +6,21 @@ name and an English location for every article:
     are keyed on the name, regardless of hazard type;
   * unnamed events are keyed on hazard + country + location.
 Two articles join the same story if their keys match and their dates are
-within `cluster.window_days`. Otherwise an article joins a story with the
-same hazard group and an overlapping country, within `cluster.similar_days`,
-whose English titles are similar enough (`cluster.min_title_similarity`).
+within `cluster.window_days`. Otherwise, candidate stories with the same
+hazard group and a shared country within `cluster.similar_days` are compared:
+by Claude (matcher.py, a short question costing ~$0.0003) when available,
+else by English title word overlap (`cluster.min_title_similarity`).
 """
 
+import logging
 import re
 from collections import Counter
 from datetime import datetime, timedelta
 
 from . import db
 from .textutil import domain, normalize, utcnow
+
+log = logging.getLogger("ews_news")
 
 _NAME_NOISE = re.compile(
     r"\b(super|severe|major|tropical|typhoon|hurricane|cyclone|cyclonic|storm|depression|"
@@ -36,7 +40,7 @@ def similarity(a: set, b: set) -> float:
     return len(a & b) / len(a | b) if a and b else 0.0
 
 
-def event_key(c: dict) -> str:
+def event_key(c: dict, country_names: dict = None) -> str:
     name = c.get("event_name")
     if name:
         n = re.sub(r"[^\w ]", " ", normalize(name, fold_accents=True))
@@ -47,6 +51,8 @@ def event_key(c: dict) -> str:
     hazard = _HAZARD_GROUP.get(c["hazard"], c["hazard"])
     country = (c.get("countries") or ["XX"])[0]
     loc = normalize((c.get("event_location") or "").split(",")[0], fold_accents=True)
+    if not loc or loc == normalize((country_names or {}).get(country, "")):
+        return None  # too vague (no place, or just the country): use the candidate check
     return f"{hazard}|{country}|{loc}"
 
 
@@ -60,33 +66,46 @@ def _within(a: str, b: str, days: int) -> bool:
     return abs(fa - fb) <= timedelta(days=days)
 
 
-def _similar_story(conn, c: dict, when: str, ccfg: dict):
-    """Find an existing story about the same unnamed event (see module docstring)."""
+def _candidates(conn, c: dict, when: str, ccfg: dict) -> list:
+    """Stories with the same hazard group and a shared country, close in time."""
     group = _HAZARD_GROUP.get(c["hazard"], c["hazard"])
     countries = set(c.get("countries") or [])
+    out = []
+    for r in conn.execute("SELECT id, data_json FROM stories WHERE data_json != '{}'"):
+        s = db.loads(r["data_json"])
+        if group not in {_HAZARD_GROUP.get(h, h) for h in s["hazards"]}:
+            continue
+        if countries and not countries & {x["code"] for x in s["countries"]}:
+            continue
+        if not (_within(s["event_date"], when, ccfg["similar_days"])
+                or _within(s["last_updated"], when, ccfg["similar_days"])):
+            continue
+        s["story_id"] = r["id"]
+        out.append(s)
+    out.sort(key=lambda s: s["last_updated"], reverse=True)
+    return out[:8]
+
+
+def _most_similar(c: dict, candidates: list, threshold: float):
+    """Fallback without Claude: compare English titles word by word."""
     tokens = title_tokens(c.get("title_en"))
-    best, best_sim = None, ccfg["min_title_similarity"]
-    rows = conn.execute(
-        "SELECT i.story_id, i.published_at, i.collected_at, cl.data_json FROM items i "
-        "JOIN classifications cl ON cl.item_id = i.id WHERE i.story_id IS NOT NULL").fetchall()
-    for r in rows:
-        m = db.loads(r["data_json"])
-        if _HAZARD_GROUP.get(m["hazard"], m["hazard"]) != group:
-            continue
-        if countries and not countries & set(m.get("countries") or []):
-            continue
-        if not _within(r["published_at"] or r["collected_at"], when, ccfg["similar_days"]):
-            continue
-        sim = similarity(tokens, title_tokens(m.get("title_en")))
-        if sim >= best_sim:
-            best, best_sim = r["story_id"], sim
+    best, best_sim = None, threshold
+    for s in candidates:
+        for src in s["sources"]:
+            sim = similarity(tokens, title_tokens(src.get("title_en") or src["title"]))
+            if sim >= best_sim:
+                best, best_sim = s["story_id"], sim
     return best
 
 
-def assign_stories(conn, config) -> int:
-    """Attach every classified, unclustered, relevant (or review) item to a story."""
+def assign_stories(conn, config, matcher=None) -> int:
+    """Attach every classified, unclustered, relevant (or review) item to a story.
+
+    matcher: optional StoryMatcher (Claude) for articles without an event-name match.
+    """
     ccfg = config.settings["cluster"]
     window = ccfg["window_days"]
+    names = {k: v["name"] for k, v in config.countries.items()}
     rows = conn.execute(
         "SELECT i.*, c.data_json, c.relevant, c.review FROM items i "
         "JOIN classifications c ON c.item_id = i.id "
@@ -95,36 +114,44 @@ def assign_stories(conn, config) -> int:
     touched = set()
     for row in rows:
         c = db.loads(row["data_json"])
-        key = event_key(c)
+        key = event_key(c, names)
         when = _date(row)
         story_id = None
-        for s in conn.execute("SELECT id, event_date, last_updated FROM stories WHERE event_key = ?",
-                              (key,)):
+        same_key = conn.execute("SELECT id, event_date, last_updated FROM stories WHERE event_key = ?",
+                                (key,)).fetchall() if key else []
+        for s in same_key:
             if _within(s["event_date"] or s["last_updated"], when, window):
                 story_id = s["id"]
                 break
         if story_id is None:
-            story_id = _similar_story(conn, c, when, ccfg)
+            candidates = _candidates(conn, c, when, ccfg)
+            if candidates and matcher is not None:
+                try:
+                    story_id = matcher.match(c, candidates)
+                except Exception as e:  # budget reached or API problem: fall back
+                    log.warning("story matcher unavailable (%s); using title similarity", e)
+                    matcher = None
+            if story_id is None and candidates and matcher is None:
+                story_id = _most_similar(c, candidates, ccfg["min_title_similarity"])
         if story_id is None:
             now = utcnow()
             cur = conn.execute(
                 "INSERT INTO stories (event_key, hazard, first_seen, last_updated, event_date, data_json)"
-                " VALUES (?,?,?,?,?,?)", (key, c["hazard"], now, now, when, "{}"))
+                " VALUES (?,?,?,?,?,?)", (key or "", c["hazard"], now, now, when, "{}"))
             story_id = cur.lastrowid
         conn.execute("UPDATE items SET story_id = ? WHERE id = ?", (story_id, row["id"]))
+        rebuild_story(conn, config, story_id)  # keep candidates up to date within this run
         touched.add(story_id)
-    for sid in touched:
-        rebuild_story(conn, config, sid)
     conn.commit()
     return len(touched)
 
 
-def recluster(conn, config) -> int:
+def recluster(conn, config, matcher=None) -> int:
     """Throw away all stories and rebuild them (after changing cluster settings)."""
     conn.execute("UPDATE items SET story_id = NULL")
     conn.execute("DELETE FROM stories")
     conn.commit()
-    return assign_stories(conn, config)
+    return assign_stories(conn, config, matcher)
 
 
 def _merge_outcome(outcomes) -> str:

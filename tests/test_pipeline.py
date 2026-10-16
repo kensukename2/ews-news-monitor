@@ -153,3 +153,46 @@ def test_baseline_first_run_and_source_rules(tmp_config):
                       "2000") == "filtered_out"
     assert store_item(conn, tmp_config, gdacs, _raw("https://g/2", "Red alert for tropical cyclone MELISSA", "en"),
                       "2000") == "pending"
+    # "red" must not match inside "occurred"
+    assert store_item(conn, tmp_config, gdacs, _raw("https://g/3", "Green earthquake occurred in Russia", "en"),
+                      "2000") == "filtered_out"
+
+
+def test_matcher_joins_cross_language_and_falls_back(tmp_config):
+    conn = db.connect(tmp_config.path("database"))
+    src = {"id": "t", "prefilter": "relaxed"}
+    rows = [("https://a/1", "Japan issues false magnitude 9.9 quake alert", "en"),
+            ("https://b/2", "Falsa alerta de un terremoto 9,9 generó pánico en Japón", "es")]
+    for url, title, lang in rows:
+        store_item(conn, tmp_config, src, _raw(url, title, lang), "2000")
+        item_id = conn.execute("SELECT id FROM items WHERE url = ?", (url,)).fetchone()[0]
+        save_classification(conn, item_id, "test", sample_classification(
+            language=lang, title_en=title if lang == "en" else "Panic in Tohoku after phone message",
+            event_name=None, hazard="earthquake", countries=["JP"], event_location=None, review=False))
+
+    class Matcher:
+        def __init__(self):
+            self.calls = 0
+
+        def match(self, article, candidates):
+            self.calls += 1
+            return candidates[0]["story_id"]
+
+    m = Matcher()
+    cluster.assign_stories(conn, tmp_config, m)
+    assert m.calls == 1  # only asked for the second article
+    assert conn.execute("SELECT COUNT(*) FROM stories").fetchone()[0] == 1
+
+    class Broken:
+        def match(self, article, candidates):
+            raise RuntimeError("budget")
+
+    cluster.recluster(conn, tmp_config, Broken())  # falls back to title words: no overlap
+    assert conn.execute("SELECT COUNT(*) FROM stories").fetchone()[0] == 2
+
+
+def test_vague_location_has_no_key():
+    names = {"JP": "Japan"}
+    assert cluster.event_key(sample_classification(event_name=None, event_location=None), names) is None
+    assert cluster.event_key(sample_classification(event_name=None, countries=["JP"],
+                                                   event_location="Japan"), names) is None
