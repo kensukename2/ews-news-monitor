@@ -19,6 +19,12 @@ def _pattern(term: str, word_boundaries: bool, fold_accents: bool):
     return re.compile(t)
 
 
+def hits(text: str, terms, lang: dict) -> list:
+    """Return the terms found in text (text is normalised here)."""
+    text = normalize(text, bool(lang.get("fold_accents")))
+    return _hits(text, terms, lang)
+
+
 def _hits(text: str, terms, lang: dict) -> list:
     wb = bool(lang.get("word_boundaries"))
     fa = bool(lang.get("fold_accents"))

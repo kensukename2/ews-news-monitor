@@ -31,6 +31,11 @@ NOT relevant: generic climate-change commentary; pure damage reports with no men
 warnings or forecasts; routine daily weather forecasts or automatic listings of current \
 warnings without any news content; non-natural hazards (health, crime, finance, conflict).
 
+An official press release from a meteorological, hydrological, geophysical or civil \
+protection agency about warnings, forecasts or alert levels it issued (including follow-up \
+reports such as "第2報", corrections or cancellations) is RELEVANT even if only its title \
+is available.
+
 You only see the title and a short snippet. Judge from what is stated; do not invent facts. \
 Use null, empty lists or "not_reported" when information is not given.
 

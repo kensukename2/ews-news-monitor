@@ -14,7 +14,8 @@ from .budget import Budget, BudgetExceeded
 from .classify import Classifier
 from .collectors import COLLECTORS
 from .http import PoliteSession
-from .textutil import canonical_url, domain, normalize, title_key, utcnow
+from .matcher import StoryMatcher
+from .textutil import canonical_url, domain, title_key, utcnow
 
 log = logging.getLogger("ews_news")
 
@@ -31,11 +32,12 @@ def make_context(config, conn, run_id):
 # --------------------------------------------------------------------- collect
 
 def _source_rules_ok(source: dict, text: str) -> bool:
-    """Optional per-source word lists in sources.yaml: require_any / exclude_any."""
-    t = normalize(text, fold_accents=True)
-    req = [normalize(w, fold_accents=True) for w in source.get("require_any", [])]
-    exc = [normalize(w, fold_accents=True) for w in source.get("exclude_any", [])]
-    return (not req or any(w in t for w in req)) and not any(w in t for w in exc)
+    """Optional per-source word lists in sources.yaml: require_any / exclude_any.
+    Whole-word matching, so "red" does not match "occurred"."""
+    rules = {"word_boundaries": True, "fold_accents": True}
+    req = prefilter.hits(text, source.get("require_any"), rules)
+    exc = prefilter.hits(text, source.get("exclude_any"), rules)
+    return (not source.get("require_any") or bool(req)) and not exc
 
 
 def store_item(conn, config, source: dict, raw: dict, cutoff: str, baseline: bool = False) -> str:
@@ -199,7 +201,8 @@ def run(config, collect=True, classify=True, only_sources=None) -> dict:
             stats["sources"] = collect_all(ctx, only_sources)
         if classify:
             stats["classify"] = classify_pending(ctx)
-        stats["stories_touched"] = cluster.assign_stories(conn, config)
+        matcher = StoryMatcher(config, ctx.budget, ctx.anthropic) if ctx.anthropic else None
+        stats["stories_touched"] = cluster.assign_stories(conn, config, matcher)
         failed = [s for s in stats["sources"] if s["error"]]
         if failed:
             status = "partial" if len(failed) < len(stats["sources"]) else "failed"

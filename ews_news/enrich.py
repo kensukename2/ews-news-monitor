@@ -16,11 +16,15 @@ _META = re.compile(
 _CONTENT = re.compile(r'content\s*=\s*(["\'])(.*?)\1', re.I | re.S)
 
 
+_PLACEHOLDERS = {"description", "default", "null", "undefined", "none"}
+
+
 def extract_description(html_text: str) -> str:
     for tag in _META.findall(html_text):
         m = _CONTENT.search(tag)
-        if m and m.group(2).strip():
-            return clean_text(m.group(2))
+        text = clean_text(m.group(2)) if m else ""
+        if len(text) >= 8 and text.lower() not in _PLACEHOLDERS:
+            return text
     return ""
 
 

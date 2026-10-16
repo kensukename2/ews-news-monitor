@@ -147,3 +147,8 @@ def test_find_date_formats():
     assert find_date("Publicado el 15 de octubre de 2026") == "2026-10-15T00:00:00Z"
     assert find_date("2026.10.16 田中理事長") == "2026-10-16T00:00:00Z"
     assert find_date("no date") is None
+
+
+def test_placeholder_meta_description_ignored():
+    html = '<meta name="description" content="description"><meta property="og:description" content="短い">'
+    assert extract_description(html) == ""
