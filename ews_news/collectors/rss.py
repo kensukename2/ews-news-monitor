@@ -32,4 +32,8 @@ def parse_feed(content: bytes, source: dict) -> list:
 def collect(source: dict, ctx) -> list:
     r = ctx.http.get(source["url"])
     r.raise_for_status()
+    if not feedparser.parse(r.content).version:
+        # e.g. a bot-protection page served with HTTP 200 instead of the feed
+        raise ValueError(f"not a feed (content-type {r.headers.get('content-type')}, "
+                         f"starts {r.text[:60]!r}); blocked or moved?")
     return parse_feed(r.content, source)
