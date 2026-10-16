@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns="http://purl.org/rss/1.0/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel rdf:about="https://www.asahi.com/"><title>朝日新聞デジタル</title><link>https://www.asahi.com/</link><description>速報ニュース</description></channel>
+<item rdf:about="https://www.asahi.com/articles/AST0000001.html?ref=rss"><title>線状降水帯が発生　鹿児島県に大雨特別警報、気象庁が最大級の警戒呼びかけ</title><link>https://www.asahi.com/articles/AST0000001.html?ref=rss</link><dc:date>2026-10-16T06:30:00+09:00</dc:date><description>気象庁は16日朝、鹿児島県に大雨特別警報を発表した。</description></item>
+<item rdf:about="https://www.asahi.com/articles/AST0000002.html?ref=rss"><title>ＮＴＴドコモ、緊急地震速報が配信されず　システムに不具合</title><link>https://www.asahi.com/articles/AST0000002.html?ref=rss</link><dc:date>2026-10-16T12:00:00+09:00</dc:date></item>
+<item rdf:about="https://www.asahi.com/articles/AST0000003.html?ref=rss"><title>プロ野球、阪神が逆転勝ち</title><link>https://www.asahi.com/articles/AST0000003.html?ref=rss</link><dc:date>2026-10-16T21:00:00+09:00</dc:date></item>
+</rdf:RDF>

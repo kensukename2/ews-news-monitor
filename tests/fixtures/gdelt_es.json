@@ -1,0 +1,5 @@
+{"articles": [
+ {"url": "https://www.example.mx/nacional/huracan-alerta-roja-guerrero", "url_mobile": "", "title": "Huracán activa alerta roja en Guerrero ; Protección Civil evacua a 5 mil personas", "seendate": "20261015T183000Z", "socialimage": "", "domain": "example.mx", "language": "Spanish", "sourcecountry": "Mexico"},
+ {"url": "https://www.example.co/clima/ideam-alerta", "title": "IDEAM declara alerta naranja por crecida del río Magdalena", "seendate": "20261015T120000Z", "domain": "example.co", "language": "Spanish", "sourcecountry": "Colombia"},
+ {"title": "missing url is skipped", "seendate": "20261015T120000Z"}
+]}
