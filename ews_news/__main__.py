@@ -8,7 +8,7 @@
     python -m ews_news recluster --use-claude   # ... asking Claude about unclear matches (small cost)
     python -m ews_news report              # last run summary and spending
     python -m ews_news check-sources       # test every RSS feed in config/sources.yaml
-    python -m ews_news daily-gate          # exit 0 only at 05:xx Europe/Zurich (for CI)
+    python -m ews_news daily-gate          # exit 0 if it is >= 05:00 Zurich and no run yet today (CI)
 """
 
 import argparse
@@ -46,10 +46,6 @@ def main(argv=None):
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     config = load_config()
 
-    if args.cmd == "daily-gate":
-        now = datetime.now(ZoneInfo(config.settings["timezone"]))
-        print(f"local time {now:%Y-%m-%d %H:%M %Z}")
-        sys.exit(0 if now.hour == args.hour else 1)
 
     if args.cmd == "check-sources":
         from .check import check_sources
@@ -59,6 +55,21 @@ def main(argv=None):
         return
 
     db.restore(config.path("database"), config.path("db_dump"))
+
+    if args.cmd == "daily-gate":
+        # GitHub's scheduler runs in UTC and may start late, so the workflow is
+        # triggered at 03:00 and 04:00 UTC; run once per local day from 05:00.
+        tz = ZoneInfo(config.settings["timezone"])
+        now = datetime.now(tz)
+        conn = db.connect(config.path("database"))
+        last = conn.execute("SELECT started_at FROM runs ORDER BY id DESC LIMIT 1").fetchone()
+        last_local = (datetime.fromisoformat(last[0].replace("Z", "+00:00")).astimezone(tz)
+                      if last else None)
+        ok = now.hour >= args.hour and (last_local is None or last_local.date() < now.date())
+        print(f"local time {now:%Y-%m-%d %H:%M %Z}; last run "
+              f"{last_local:%Y-%m-%d %H:%M}" if last_local else f"local time {now:%Y-%m-%d %H:%M %Z}; no runs yet")
+        print("run" if ok else "skip")
+        sys.exit(0 if ok else 1)
 
     if args.cmd == "run":
         result = run(config, collect=not args.no_collect, classify=not args.no_classify,

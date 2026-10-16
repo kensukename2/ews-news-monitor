@@ -1,0 +1,125 @@
+# Daily pipeline + deployment of knaito.xyz (GitHub Pages).
+#
+# * Scheduled: triggered at 03:00 and 04:00 UTC; `daily-gate` lets exactly one
+#   run through per day at or after 05:00 Europe/Zurich (summer and winter time).
+# * Manual: Actions tab -> "Daily EWS news" -> Run workflow.
+# * Push to main: redeploys the site with the existing data (no new collection).
+#
+# State (SQLite text dump, run logs, published JSON) lives on the `data` branch.
+name: Daily EWS news
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+    inputs:
+      run_pipeline:
+        description: "Collect and classify new items (false = only redeploy the site)"
+        type: boolean
+        default: true
+  push:
+    branches: [main]
+
+permissions:
+  contents: write   # push to the data branch
+  pages: write
+  id-token: write
+
+concurrency:
+  group: ews-news
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Check out the data branch into state/
+        run: |
+          git config user.name "ews-news-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git fetch --depth=1 origin data:data; then
+            git worktree add state data
+          else
+            git worktree add --orphan -b data state
+            printf 'ews.sqlite\n' > state/.gitignore
+          fi
+
+      - name: Decide whether to run the pipeline
+        id: gate
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run=${{ inputs.run_pipeline }}" >> "$GITHUB_OUTPUT"
+          elif python -m ews_news daily-gate; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run pipeline
+        id: pipeline
+        if: steps.gate.outputs.run == 'true'
+        continue-on-error: true   # still publish, so the page can show the failure
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RELIEFWEB_APPNAME: ${{ secrets.RELIEFWEB_APPNAME }}
+        run: python -m ews_news run
+
+      - name: Save state to the data branch
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          mkdir -p state/published
+          cp -r site/ews_news/data/. state/published/ 2>/dev/null || true
+          cd state
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -q -m "Data update $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push origin data
+          fi
+
+      - name: Rebuild page data from saved state (no new collection)
+        if: steps.gate.outputs.run != 'true'
+        run: |
+          if [ -f state/ews.sql ]; then python -m ews_news publish; fi
+
+      - name: Skip deployment on scheduled runs that did not run
+        id: should_deploy
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "${{ steps.gate.outputs.run }}" != "true" ]; then
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/configure-pages@v5
+        if: steps.should_deploy.outputs.deploy == 'true'
+
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.should_deploy.outputs.deploy == 'true'
+        with:
+          path: site
+
+      - id: deploy
+        if: steps.should_deploy.outputs.deploy == 'true'
+        uses: actions/deploy-pages@v4
+
+      - name: Fail the job if the pipeline failed (sends you an e-mail)
+        if: steps.pipeline.outcome == 'failure'
+        run: |
+          echo "Pipeline failed; the page shows the failure notice. See the 'Run pipeline' step log."
+          exit 1
