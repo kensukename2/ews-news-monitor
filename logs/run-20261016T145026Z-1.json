@@ -1,0 +1,59 @@
+{
+  "run_id": 1,
+  "started_at": "2026-10-16T14:50:26Z",
+  "status": "success",
+  "sources": [
+    {
+      "source_id": "gdelt_en",
+      "language": "en",
+      "fetched": 57,
+      "new_items": 57,
+      "kept": 57,
+      "error": null
+    },
+    {
+      "source_id": "asahi_news",
+      "language": "ja",
+      "fetched": 40,
+      "new_items": 40,
+      "kept": 2,
+      "error": null
+    },
+    {
+      "source_id": "gdelt_es",
+      "language": "es",
+      "fetched": 39,
+      "new_items": 39,
+      "kept": 39,
+      "error": null
+    }
+  ],
+  "classify": {},
+  "stories_touched": 0,
+  "fatal_error": null,
+  "budget": {
+    "spent_month_usd": 0,
+    "allowance_run_usd": 0.3125,
+    "monthly_usd": 5.0
+  },
+  "by_language": {
+    "en": {
+      "fetched": 57,
+      "new_items": 57,
+      "kept": 57,
+      "errors": 0
+    },
+    "ja": {
+      "fetched": 40,
+      "new_items": 40,
+      "kept": 2,
+      "errors": 0
+    },
+    "es": {
+      "fetched": 39,
+      "new_items": 39,
+      "kept": 39,
+      "errors": 0
+    }
+  }
+}

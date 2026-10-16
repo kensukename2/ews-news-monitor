@@ -1,0 +1,92 @@
+{
+  "run_id": 2,
+  "started_at": "2026-10-16T15:00:05Z",
+  "status": "partial",
+  "sources": [
+    {
+      "source_id": "gdelt_en",
+      "language": "en",
+      "fetched": 0,
+      "new_items": 0,
+      "kept": 0,
+      "error": "HTTPError: 429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=%28%22early+warning%22+OR+%22warning+issued%22+OR+%22red+alert%22+OR+%22evacuated+ahead%22+OR+%22anticipatory+action%22+OR+%22cell+broadcast%22%29+%28flood+OR+cyclone+OR+typhoon+OR+hurricane+OR+"
+    },
+    {
+      "source_id": "websearch_en",
+      "language": "en",
+      "fetched": 0,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "asahi_news",
+      "language": "ja",
+      "fetched": 40,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "websearch_ja",
+      "language": "ja",
+      "fetched": 0,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "gdelt_es",
+      "language": "es",
+      "fetched": 39,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "websearch_es",
+      "language": "es",
+      "fetched": 1,
+      "new_items": 1,
+      "kept": 1,
+      "error": null
+    }
+  ],
+  "classify": {
+    "classified": 42,
+    "relevant": 32,
+    "review": 2,
+    "errors": 0,
+    "copied": 19,
+    "left_pending": 0,
+    "budget_stopped": false,
+    "cost_usd": 0.0475
+  },
+  "stories_touched": 30,
+  "fatal_error": null,
+  "budget": {
+    "spent_month_usd": 0.0593,
+    "allowance_run_usd": 0.3118,
+    "monthly_usd": 5.0
+  },
+  "by_language": {
+    "en": {
+      "fetched": 0,
+      "new_items": 0,
+      "kept": 0,
+      "errors": 1
+    },
+    "ja": {
+      "fetched": 40,
+      "new_items": 0,
+      "kept": 0,
+      "errors": 0
+    },
+    "es": {
+      "fetched": 40,
+      "new_items": 1,
+      "kept": 1,
+      "errors": 0
+    }
+  }
+}

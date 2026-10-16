@@ -1,0 +1,24 @@
+{
+  "run_id": 5,
+  "started_at": "2026-10-16T15:39:50Z",
+  "status": "success",
+  "sources": [],
+  "classify": {
+    "classified": 2,
+    "relevant": 2,
+    "review": 0,
+    "errors": 0,
+    "copied": 0,
+    "left_pending": 0,
+    "budget_stopped": false,
+    "cost_usd": 0.001
+  },
+  "stories_touched": 1,
+  "fatal_error": null,
+  "budget": {
+    "spent_month_usd": 0.1504,
+    "allowance_run_usd": 0.3032,
+    "monthly_usd": 5.0
+  },
+  "by_language": {}
+}

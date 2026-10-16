@@ -1,0 +1,62 @@
+{
+  "run_id": 3,
+  "started_at": "2026-10-16T15:07:46Z",
+  "status": "success",
+  "sources": [
+    {
+      "source_id": "gdelt_en",
+      "language": "en",
+      "fetched": 58,
+      "new_items": 1,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "websearch_en",
+      "language": "en",
+      "fetched": 4,
+      "new_items": 4,
+      "kept": 4,
+      "error": null
+    },
+    {
+      "source_id": "websearch_ja",
+      "language": "ja",
+      "fetched": 1,
+      "new_items": 1,
+      "kept": 0,
+      "error": null
+    }
+  ],
+  "classify": {
+    "classified": 5,
+    "relevant": 5,
+    "review": 0,
+    "errors": 0,
+    "copied": 0,
+    "left_pending": 0,
+    "budget_stopped": false,
+    "cost_usd": 0.0247
+  },
+  "stories_touched": 3,
+  "fatal_error": null,
+  "budget": {
+    "spent_month_usd": 0.0953,
+    "allowance_run_usd": 0.3081,
+    "monthly_usd": 5.0
+  },
+  "by_language": {
+    "en": {
+      "fetched": 62,
+      "new_items": 5,
+      "kept": 5,
+      "errors": 0
+    },
+    "ja": {
+      "fetched": 1,
+      "new_items": 1,
+      "kept": 0,
+      "errors": 0
+    }
+  }
+}
