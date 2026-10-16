@@ -1,0 +1,138 @@
+# EWS News Monitor
+
+Collects news every day about how **early warning services** were provided
+during hazardous events (how hazards were monitored and forecast, how
+warnings were issued and communicated, what people did, and what happened as
+a result) and publishes it at **https://knaito.xyz/ews_news**, grouped by
+WMO Regional Association (RA I–VI).
+
+Sources are in English, Japanese and Spanish (more languages can be added
+through configuration). Articles are classified and summarised with the
+Claude API (Claude Haiku); only titles, short summaries and links are
+stored, never full article text.
+
+## How it works
+
+```
+collect ──► pre-filter ──► classify (Claude) ──► cluster into stories ──► publish JSON ──► web page
+(RSS, APIs,   (keywords      (structured JSON:      (same event across      (site/ews_news/
+ list pages,   per language)  hazard, countries,     languages, e.g.         data/*.json)
+ web search)                  EW4All pillars,        "Typhoon X" in en/ja/es)
+                              outcome, summaries)
+```
+
+1. **Collect** (`ews_news/collectors/`): RSS feeds, the GDELT DOC API, Claude
+   web search, JMA's press list, and news list pages of agencies that have no
+   feed. robots.txt is respected and each site is contacted at most once
+   every 1.5 s.
+2. **Pre-filter** (`ews_news/prefilter.py`): cheap keyword rules per language
+   (`config/languages/*.yaml`). Japanese works without spaces between words.
+3. **Classify** (`ews_news/classify.py`): Claude Haiku returns structured
+   JSON (schema in `ews_news/schema.py`). A URL is never classified twice;
+   the same headline from several outlets is classified once. Items with
+   confidence below 0.6 are flagged **Needs review** instead of being dropped.
+4. **Cluster** (`ews_news/cluster.py`): articles about the same event become
+   one story, also across languages (by event name, else by asking Claude
+   which candidate story matches).
+5. **Store** in SQLite (`state/ews.sqlite`), designed to move to PostgreSQL.
+6. **Publish** static JSON for the page (`docs/data-schema.md`).
+
+## Costs
+
+All Claude calls are logged with their cost in the `api_usage` table and
+capped by `budget.monthly_usd` in `config/settings.yaml` (default **$5**).
+Each run may spend what is left this month divided by the days left; work
+that does not fit stays pending for the next day. Typical daily cost:
+3 web searches (~$0.011 each) + ~50–100 classifications (~$0.0003 each),
+about **$1.5–2 per month**. Check spending with `python -m ews_news report`.
+
+## Setup (local)
+
+Requires Python 3.10 or newer.
+
+```bash
+git clone https://github.com/kensukename2/ews-news-monitor.git
+cd ews-news-monitor
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+cp .env.example .env        # then put your Anthropic API key in .env
+```
+
+## Running it manually
+
+```bash
+.venv/bin/python -m ews_news run                  # full pipeline (collect, classify, publish)
+.venv/bin/python -m ews_news run --no-classify    # collect only, no API cost
+.venv/bin/python -m ews_news run --source nhk_news --source jma_press   # selected sources
+.venv/bin/python -m ews_news check-sources --all  # test every feed / list page
+.venv/bin/python -m ews_news report               # last run and this month's spending
+.venv/bin/python -m ews_news recluster            # rebuild stories after changing cluster settings
+.venv/bin/python -m pytest                        # tests
+```
+
+To see the page locally:
+
+```bash
+.venv/bin/python -m http.server 8000 --directory site
+# open http://localhost:8000/ews_news/
+```
+
+## Configuration
+
+| File | What it controls |
+|---|---|
+| `config/sources.yaml` | All sources, grouped by language. Each has a `type` (`rss`, `gdelt`, `claude_search`, `html_links`, `jma_press`), a pre-filter mode and `enabled`. Disabled entries record why a listed source could not be used. |
+| `config/languages/en.yaml`, `ja.yaml`, `es.yaml` | Keyword pre-filter (`strong_terms`, `warning_terms`, `hazard_terms`, `exclude_terms`), GDELT queries and web-search queries for that language. |
+| `config/countries.yaml` | Country code → name and WMO Regional Association. |
+| `config/settings.yaml` | Model, budget, confidence threshold, clustering windows, paths. |
+
+**Adding a source:** prefer an RSS feed (`type: rss`). If a site has no
+feed, use `type: html_links` with the news list page as `url` and a
+`link_pattern` (regular expression matching the article links' paths). Run
+`python -m ews_news check-sources` to test it.
+
+**Adding a language** (e.g. French): copy `config/languages/es.yaml` to
+`fr.yaml`, set `code: fr`, translate the keyword lists and queries, then add
+sources with `language: fr` to `config/sources.yaml`. No code changes are
+needed. (Web-search queries can use `{month_en}`, `{month_ja}`, `{month_es}`,
+`{today}`; add a month name for a new language in
+`ews_news/collectors/websearch.py` if you need one.)
+
+## Deployment
+
+The site is served by **GitHub Pages** from this repository with the custom
+domain `knaito.xyz`; `alerts.knaito.xyz` (CAP Composer, on its own server) is
+not affected.
+
+`.github/workflows/daily.yml`:
+
+* runs at 03:00 and 04:00 UTC; `daily-gate` lets one run through per day at
+  or after **05:00 Europe/Zurich** (summer and winter time);
+* restores the database from the **`data` branch**, runs the pipeline,
+  commits the updated database dump (`ews.sql`), run logs (`logs/`) and
+  published JSON back to `data`, and deploys `site/` to GitHub Pages;
+* if the pipeline fails, the site is still deployed with a failure notice
+  and the workflow is marked as failed (GitHub e-mails you);
+* a push to `main` redeploys the site with the existing data;
+* can be started by hand: *Actions → Daily EWS news → Run workflow*.
+
+One-time setup:
+
+1. Repository *Settings → Secrets and variables → Actions*: add
+   `ANTHROPIC_API_KEY` (and optionally `RELIEFWEB_APPNAME`).
+2. *Settings → Pages*: Source = **GitHub Actions**; custom domain
+   `knaito.xyz`; tick *Enforce HTTPS* once the certificate is issued.
+3. DNS at Porkbun for `knaito.xyz`: remove the parking/forwarding record for
+   the apex, add `A` records to `185.199.108.153`, `185.199.109.153`,
+   `185.199.110.153`, `185.199.111.153` (optionally `www` `CNAME`
+   `kensukename2.github.io`). Leave the `alerts` record unchanged.
+
+## Data and privacy
+
+Only metadata (title, source, date, URL), a short snippet/description and
+generated summaries are stored. Secrets are read from `.env` locally and
+from GitHub Actions secrets in CI; `.env` is never committed.
+
+## License
+
+MIT. See `LICENSE`.
