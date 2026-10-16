@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EWS News Monitor | knaito.xyz</title>
+  <meta name="description" content="Daily news on how early warning services were provided during hazardous events, grouped by WMO Region.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+  <link rel="stylesheet" href="../site.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page-wrapper">
+  <header class="site-header">
+    <div class="container">
+      <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+          <a class="navbar-item site-brand" href="/">knaito.xyz</a>
+          <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="site-menu">
+            <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+          </a>
+        </div>
+        <div id="site-menu" class="navbar-menu">
+          <div class="navbar-start">
+            <a class="navbar-item" href="/">Home</a>
+            <a class="navbar-item" href="https://alerts.knaito.xyz">CAP Alerts</a>
+            <a class="navbar-item is-active" href="/ews_news/">EWS News</a>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="section pt-5">
+    <div class="container">
+      <h1 class="title is-3">Early Warning Services News</h1>
+      <p class="subtitle is-6">How hazards were monitored, forecast, warned about and acted on, collected daily from news and official sources in English, Japanese and Spanish.</p>
+
+      <p class="updated">Last updated: <strong id="last-updated">…</strong> <span class="has-text-grey">(Europe/Zurich)</span></p>
+      <div id="status-banner"></div>
+
+      <div class="tabs is-boxed region-tabs" id="region-tabs"><ul></ul></div>
+
+      <form class="box filters" id="filters" autocomplete="off">
+        <div class="columns is-multiline is-variable is-2">
+          <div class="column is-12-mobile is-6-tablet is-4-desktop">
+            <label class="label is-small" for="f-search">Search</label>
+            <input class="input is-small" type="search" id="f-search" placeholder="e.g. typhoon, SENAMHI, 避難, evacuación">
+          </div>
+          <div class="column is-6-mobile is-3-tablet is-2-desktop">
+            <label class="label is-small" for="f-from">From</label>
+            <input class="input is-small" type="date" id="f-from">
+          </div>
+          <div class="column is-6-mobile is-3-tablet is-2-desktop">
+            <label class="label is-small" for="f-to">To</label>
+            <input class="input is-small" type="date" id="f-to">
+          </div>
+          <div class="column is-6-mobile is-4-tablet is-2-desktop"><label class="label is-small" for="f-hazard">Hazard</label><div class="select is-small is-fullwidth"><select id="f-hazard"></select></div></div>
+          <div class="column is-6-mobile is-4-tablet is-2-desktop"><label class="label is-small" for="f-country">Country</label><div class="select is-small is-fullwidth"><select id="f-country"></select></div></div>
+          <div class="column is-6-mobile is-4-tablet is-3-desktop"><label class="label is-small" for="f-agency">Agency type</label><div class="select is-small is-fullwidth"><select id="f-agency"></select></div></div>
+          <div class="column is-6-mobile is-4-tablet is-3-desktop"><label class="label is-small" for="f-pillar">EW4All pillar</label><div class="select is-small is-fullwidth"><select id="f-pillar"></select></div></div>
+          <div class="column is-6-mobile is-4-tablet is-2-desktop"><label class="label is-small" for="f-outcome">Outcome</label><div class="select is-small is-fullwidth"><select id="f-outcome"></select></div></div>
+          <div class="column is-6-mobile is-4-tablet is-2-desktop"><label class="label is-small" for="f-lang">Language</label><div class="select is-small is-fullwidth"><select id="f-lang"></select></div></div>
+          <div class="column is-12-mobile is-12-tablet is-2-desktop filter-actions">
+            <label class="checkbox is-size-7"><input type="checkbox" id="f-review" checked> Include items flagged for review</label>
+            <button type="reset" class="button is-small is-light" id="f-reset">Reset filters</button>
+          </div>
+        </div>
+      </form>
+
+      <p class="result-count has-text-grey is-size-7" id="result-count"></p>
+
+      <section id="today-section" hidden>
+        <h2 class="title is-5 section-heading">New today</h2>
+        <div id="today-list"></div>
+      </section>
+      <section id="earlier-section">
+        <h2 class="title is-5 section-heading" id="earlier-heading">Earlier stories</h2>
+        <div id="earlier-list"></div>
+        <div class="has-text-centered mt-4">
+          <button class="button is-small" id="load-more" hidden>Load more</button>
+        </div>
+      </section>
+      <div id="loading" class="has-text-grey has-text-centered py-6">Loading news…</div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container has-text-centered is-size-7">
+      Automatically collected and summarised with the Claude API; summaries may contain errors, so always check the original sources.
+      Only titles, short summaries and links are stored. · <a href="https://github.com/kensukename2/ews-news-monitor">Source code</a>
+    </div>
+  </footer>
+</div>
+<script src="../site.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
