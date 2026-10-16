@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS items (
     collected_at    TEXT NOT NULL,
     snippet         TEXT,                   -- short description only, never full text
     prefilter_score REAL,
-    status          TEXT NOT NULL,          -- filtered_out | pending | classified | duplicate | error
+    status          TEXT NOT NULL,          -- filtered_out | pending | classified | duplicate | baseline | error
     duplicate_of    INTEGER REFERENCES items(id),
     story_id        INTEGER REFERENCES stories(id)
 );

@@ -139,3 +139,17 @@ def test_unnamed_event_joins_by_title_similarity(tmp_config):
             review=False))
     assert cluster.assign_stories(conn, tmp_config) == 2
     assert conn.execute("SELECT COUNT(*) FROM stories").fetchone()[0] == 2
+
+
+def test_baseline_first_run_and_source_rules(tmp_config):
+    conn = db.connect(tmp_config.path("database"))
+    src = {"id": "list", "prefilter": "relaxed"}
+    undated = dict(_raw("https://x/old", "Senamhi emite aviso por lluvias", "es"), published_at=None)
+    assert store_item(conn, tmp_config, src, undated, "2000", baseline=True) == "baseline"
+    later = dict(_raw("https://x/new", "Senamhi emite aviso por heladas", "es"), published_at=None)
+    assert store_item(conn, tmp_config, src, later, "2000", baseline=False) == "pending"
+    gdacs = {"id": "gdacs", "prefilter": "relaxed", "require_any": ["orange", "red"]}
+    assert store_item(conn, tmp_config, gdacs, _raw("https://g/1", "Green notification for tropical cyclone", "en"),
+                      "2000") == "filtered_out"
+    assert store_item(conn, tmp_config, gdacs, _raw("https://g/2", "Red alert for tropical cyclone MELISSA", "en"),
+                      "2000") == "pending"

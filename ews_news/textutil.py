@@ -91,5 +91,46 @@ def parse_date(value) -> Optional[str]:
     return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+_MONTHS = {m: i + 1 for i, m in enumerate(
+    ["january", "february", "march", "april", "may", "june", "july", "august",
+     "september", "october", "november", "december"])}
+_MONTHS.update({m: i + 1 for i, m in enumerate(
+    ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+     "septiembre", "octubre", "noviembre", "diciembre"])})
+_DATE_PATTERNS = [
+    (re.compile(r"(20\d\d)[./-](\d{1,2})[./-](\d{1,2})"), "ymd"),
+    (re.compile(r"(20\d\d)年(\d{1,2})月(\d{1,2})日"), "ymd"),
+    (re.compile(r"令和(\d{1,2}|元)年(\d{1,2})月(\d{1,2})日"), "reiwa"),
+    (re.compile(r"(\d{1,2})(?:\s+de)?\s+([a-z]+)(?:\s+de)?\s+(20\d\d)"), "dmy_name"),
+    (re.compile(r"([a-z]+)\s+(\d{1,2}),?\s+(20\d\d)"), "mdy_name"),
+]
+
+
+def find_date(text: str) -> Optional[str]:
+    """Find a date written in text, e.g. '8 October 2026', '2026.10.16',
+    '令和８年10月13日', '15 de octubre de 2026'. Returns ISO UTC midnight or None."""
+    t = normalize(text or "")
+    for rx, kind in _DATE_PATTERNS:
+        m = rx.search(t)
+        if not m:
+            continue
+        try:
+            if kind == "ymd":
+                y, mo, d = int(m.group(1)), int(m.group(2)), int(m.group(3))
+            elif kind == "reiwa":
+                y = 2018 + (1 if m.group(1) == "元" else int(m.group(1)))
+                mo, d = int(m.group(2)), int(m.group(3))
+            elif kind == "dmy_name":
+                y, mo, d = int(m.group(3)), _MONTHS.get(m.group(2)), int(m.group(1))
+            else:
+                y, mo, d = int(m.group(3)), _MONTHS.get(m.group(1)), int(m.group(2))
+            if not mo:
+                continue
+            return datetime(y, mo, d, tzinfo=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        except ValueError:
+            continue
+    return None
+
+
 def utcnow() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")

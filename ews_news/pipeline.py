@@ -14,7 +14,7 @@ from .budget import Budget, BudgetExceeded
 from .classify import Classifier
 from .collectors import COLLECTORS
 from .http import PoliteSession
-from .textutil import canonical_url, domain, title_key, utcnow
+from .textutil import canonical_url, domain, normalize, title_key, utcnow
 
 log = logging.getLogger("ews_news")
 
@@ -30,8 +30,21 @@ def make_context(config, conn, run_id):
 
 # --------------------------------------------------------------------- collect
 
-def store_item(conn, config, source: dict, raw: dict, cutoff: str) -> str:
-    """Insert one collected item. Returns its status, or None if not new/too old."""
+def _source_rules_ok(source: dict, text: str) -> bool:
+    """Optional per-source word lists in sources.yaml: require_any / exclude_any."""
+    t = normalize(text, fold_accents=True)
+    req = [normalize(w, fold_accents=True) for w in source.get("require_any", [])]
+    exc = [normalize(w, fold_accents=True) for w in source.get("exclude_any", [])]
+    return (not req or any(w in t for w in req)) and not any(w in t for w in exc)
+
+
+def store_item(conn, config, source: dict, raw: dict, cutoff: str, baseline: bool = False) -> str:
+    """Insert one collected item. Returns its status, or None if not new/too old.
+
+    baseline=True is used on the first run of a list-page source: undated links
+    already on the page are recorded as 'baseline' (seen, never classified), so
+    that old articles do not appear as today's news.
+    """
     if raw.get("published_at") and raw["published_at"] < cutoff:
         return None
     url_c = canonical_url(raw["url"])
@@ -42,8 +55,11 @@ def store_item(conn, config, source: dict, raw: dict, cutoff: str) -> str:
         return None
     keep, score, _ = prefilter.score(raw["title"], raw.get("snippet", ""), lang,
                                      source.get("prefilter", "strict"))
+    keep = keep and _source_rules_ok(source, f"{raw['title']} {raw.get('snippet', '')}")
     tkey = title_key(raw["title"])
     status, dup_of = ("pending" if keep else "filtered_out"), None
+    if baseline and not raw.get("published_at"):
+        status = "baseline"
     if keep and len(tkey) >= 8:
         # The same headline from another outlet: keep it as an extra source
         # for the story, but do not pay to classify it again.
@@ -74,10 +90,12 @@ def collect_all(ctx, only=None) -> list:
         st = {"source_id": source["id"], "language": source["language"],
               "fetched": 0, "new_items": 0, "kept": 0, "error": None}
         try:
+            baseline = source["type"] == "html_links" and not conn.execute(
+                "SELECT 1 FROM items WHERE source_id = ? LIMIT 1", (source["id"],)).fetchone()
             raws = COLLECTORS[source["type"]](source, ctx)
             st["fetched"] = len(raws)
             for raw in raws:
-                status = store_item(conn, config, source, raw, cutoff)
+                status = store_item(conn, config, source, raw, cutoff, baseline)
                 if status:
                     st["new_items"] += 1
                     st["kept"] += status in ("pending", "duplicate")

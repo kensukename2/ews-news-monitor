@@ -109,3 +109,41 @@ def test_websearch_relative_page_age():
     assert page_age_date("October 14, 2026", now) is None or page_age_date("2026-10-14", now) == "2026-10-14T00:00:00Z"
     assert query_vars(now)["month_ja"] == "2026年10月"
     assert query_vars(now)["month_es"] == "octubre 2026"
+
+
+def test_jma_press_list():
+    from ews_news.collectors import jma
+    items = jma.parse_press_list((FIXTURES / "jma_press_list.js").read_text(encoding="utf-8"),
+                                 {"language": "ja"})
+    assert [i["title"][:5] for i in items] == ["令和８年1", "十勝岳の噴"]  # "お知らせ" (type 0) skipped
+    assert items[0]["url"] == "https://www.jma.go.jp/jma/press/2610/16b/202610161400.html"
+    assert items[0]["published_at"] == "2026-10-15T15:00:00Z"  # 16 Oct 00:00 JST
+
+
+def test_html_links_spanish_list_page():
+    from ews_news.collectors import html_links
+    src = {"name": "SENAMHI", "language": "es", "url": "https://www.gob.pe/institucion/senamhi/noticias",
+           "link_pattern": r"/institucion/senamhi/noticias/\d+"}
+    items = html_links.parse_links((FIXTURES / "gobpe_noticias.html").read_text(encoding="utf-8"), src)
+    assert len(items) == 2  # nav link, duplicate and too-short "Ver" dropped
+    assert items[0]["url"].startswith("https://www.gob.pe/institucion/senamhi/noticias/1457388")
+    assert items[1]["title"].endswith("sierra & selva")
+
+
+def test_html_links_strip_and_date():
+    from ews_news.collectors import html_links
+    html = '<a href="/news/media-centre/global-heat-forum-seeks-action">Press Release 6 October 2026 Global Heat Forum seeks action</a>'
+    src = {"name": "WMO", "language": "en", "url": "https://wmo.int/news/media-centre",
+           "link_pattern": r"^/news/media-centre/[a-z0-9-]{15,}",
+           "strip_pattern": r"^Press Release \d{1,2} \w+ \d{4}\s*"}
+    item = html_links.parse_links(html, src)[0]
+    assert item["title"] == "Global Heat Forum seeks action"
+    assert item["published_at"] == "2026-10-06T00:00:00Z"
+
+
+def test_find_date_formats():
+    from ews_news.textutil import find_date
+    assert find_date("消防庁（令和８年１０月１３日）") == "2026-10-13T00:00:00Z"
+    assert find_date("Publicado el 15 de octubre de 2026") == "2026-10-15T00:00:00Z"
+    assert find_date("2026.10.16 田中理事長") == "2026-10-16T00:00:00Z"
+    assert find_date("no date") is None
