@@ -91,6 +91,8 @@ gdelt:
   queries:
     - '(warning OR evacuation OR "early warning" OR "emergency warning") (typhoon OR "heavy rain" OR flood OR landslide OR tsunami OR heatstroke)'
 
+# Claude web search queries (one search, about $0.011, per query per run).
+# Placeholders: {today}, {month_en}, {month_ja}, {month_es}
 web_search:
   queries:
-    - "特別警報 OR 避難指示 OR 線状降水帯 気象庁 発表 ニュース"
+    - "{month_ja} 気象庁 特別警報 OR 避難指示 OR 線状降水帯 ニュース"

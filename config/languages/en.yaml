@@ -107,7 +107,8 @@ gdelt:
   queries:
     - '("early warning" OR "warning issued" OR "red alert" OR "evacuated ahead" OR "anticipatory action" OR "cell broadcast") (flood OR cyclone OR typhoon OR hurricane OR heatwave OR landslide OR tsunami OR storm)'
 
-# Queries given to Claude web search (one search per query per run).
+# Queries given to Claude web search (one search, about $0.011, per query per run).
+# Placeholders: {today}, {month_en}, {month_ja}, {month_es}
 web_search:
   queries:
-    - "early warning issued flood OR cyclone OR hurricane OR typhoon meteorological department evacuation"
+    - "{month_en} news warning issued evacuation flood OR cyclone OR hurricane OR typhoon OR heatwave"

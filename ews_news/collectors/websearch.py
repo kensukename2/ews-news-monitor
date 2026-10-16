@@ -7,6 +7,7 @@ kept, so the model cannot invent links.
 """
 
 import json
+import re
 from datetime import datetime, timedelta, timezone
 
 from ..budget import usage_dict, web_search_count
@@ -43,6 +44,33 @@ date (YYYY-MM-DD) as shown in the search result, and a factual 1-2 sentence snip
 article's original language, based only on the search result.
 Leave out results published before {cutoff} and results whose date you cannot see \
 (use null only if you include it by mistake)."""
+
+
+MONTHS_ES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+             "septiembre", "octubre", "noviembre", "diciembre"]
+_AGO = re.compile(r"(\d+)\s+(minute|hour|day|week|month)s?\s+ago", re.I)
+
+
+def query_vars(now: datetime) -> dict:
+    """Placeholders available in web_search queries in config/languages/*.yaml."""
+    return {
+        "today": now.strftime("%Y-%m-%d"),
+        "month_en": now.strftime("%B %Y"),
+        "month_ja": f"{now.year}年{now.month}月",
+        "month_es": f"{MONTHS_ES[now.month - 1]} {now.year}",
+    }
+
+
+def page_age_date(page_age, now: datetime):
+    """Search results give page_age as a date or as e.g. "3 days ago"."""
+    if not page_age:
+        return None
+    m = _AGO.search(str(page_age))
+    if m:
+        n, unit = int(m.group(1)), m.group(2).lower()
+        hours = {"minute": 1 / 60, "hour": 1, "day": 24, "week": 168, "month": 720}[unit] * n
+        return (now - timedelta(hours=hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return parse_date(page_age)
 
 
 def parse_message(message) -> list:
@@ -83,7 +111,7 @@ def collect(source: dict, ctx) -> list:
                            "format": {"type": "json_schema", "schema": PICK_SCHEMA}},
             tools=[{"type": "web_search_20250305", "name": "web_search",
                     "max_uses": cfg["max_searches_per_query"]}],
-            messages=[{"role": "user", "content": PROMPT.format(query=query, today=today, cutoff=cutoff)}],
+            messages=[{"role": "user", "content": PROMPT.format(query=query.format(**query_vars(now)), today=today, cutoff=cutoff)}],
         )
         ctx.budget.record("web_search", cfg["model"], usage_dict(message.usage),
                           web_search_count(message.usage))
@@ -92,7 +120,7 @@ def collect(source: dict, ctx) -> list:
             r = results.get(p.get("url"))
             if not r:
                 continue  # not in the real search results: ignore
-            published = parse_date(r.get("page_age")) or parse_date(p.get("published_date"))
+            published = page_age_date(r.get("page_age"), now) or parse_date(p.get("published_date"))
             if not published or published[:10] < cutoff:
                 continue  # undated or too old: would show up as "new" otherwise
             items.append({

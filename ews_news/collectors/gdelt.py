@@ -56,7 +56,7 @@ def collect(source: dict, ctx) -> list:
                              min_interval=interval, timeout=60)
             if r.status_code != 429:
                 break
-            time.sleep(interval * (attempt + 2))
+            time.sleep(20 * (attempt + 1))  # GDELT throttles hard after a 429
         r.raise_for_status()
         if not r.text.lstrip().startswith("{"):
             # GDELT reports query errors as plain text with HTTP 200.

@@ -99,3 +99,13 @@ def test_websearch_keeps_only_real_recent_results(config):
     items = websearch.collect(config.source("websearch_ja"), ctx)
     assert [i["url"] for i in items] == ["https://a.example/new"]
     assert items[0]["snippet"] == "気象庁が特別警報を発表。"
+
+
+def test_websearch_relative_page_age():
+    from datetime import datetime, timezone
+    from ews_news.collectors.websearch import page_age_date, query_vars
+    now = datetime(2026, 10, 16, 12, 0, tzinfo=timezone.utc)
+    assert page_age_date("3 days ago", now) == "2026-10-13T12:00:00Z"
+    assert page_age_date("October 14, 2026", now) is None or page_age_date("2026-10-14", now) == "2026-10-14T00:00:00Z"
+    assert query_vars(now)["month_ja"] == "2026年10月"
+    assert query_vars(now)["month_es"] == "octubre 2026"

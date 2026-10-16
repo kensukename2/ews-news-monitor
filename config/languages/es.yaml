@@ -93,6 +93,8 @@ gdelt:
   queries:
     - '("early warning" OR "red alert" OR "orange alert" OR evacuation OR "preventive evacuation") (hurricane OR flood OR "heavy rain" OR landslide OR tsunami OR heatwave OR storm)'
 
+# Claude web search queries (one search, about $0.011, per query per run).
+# Placeholders: {today}, {month_en}, {month_ja}, {month_es}
 web_search:
   queries:
-    - "alerta temprana OR alerta roja OR evacuación preventiva huracán OR inundación OR lluvias intensas servicio meteorológico"
+    - "noticias {month_es} alerta roja OR alerta temprana OR evacuación preventiva lluvias OR huracán OR inundación"
