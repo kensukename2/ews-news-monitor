@@ -29,17 +29,3 @@
 .tag.outcome-mixed { background: #fff2d6; color: #7a5300; }
 .tag.outcome-not_reported { background: #efefef; color: #555; }
 .tag.review { background: #fff; border: 1px dashed #b08300; color: #7a5300; }
-
-@media (prefers-color-scheme: dark) {
-  .story { border-left-color: #3a3d44; }
-  .story.is-new { border-left-color: #7fb3ec; background: #18212d; }
-  .story-meta, .story dt { color: #9aa0a6; }
-  .original-summary { background: #22252b; }
-  .lang-badge { background: #2c2f36; color: #ccc; }
-  .story details summary { color: #7fb3ec; }
-  .tag.outcome-positive { background: #173d24; color: #9fe0b2; }
-  .tag.outcome-negative { background: #4a1c1c; color: #f4b0b0; }
-  .tag.outcome-mixed { background: #45360f; color: #f1d58b; }
-  .tag.outcome-not_reported { background: #2c2f36; color: #bbb; }
-  .tag.review { background: transparent; color: #f1d58b; }
-}
