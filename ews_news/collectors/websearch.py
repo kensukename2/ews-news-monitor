@@ -7,6 +7,7 @@ kept, so the model cannot invent links.
 """
 
 import json
+from datetime import datetime, timedelta, timezone
 
 from ..budget import usage_dict, web_search_count
 from ..textutil import clean_text, parse_date
@@ -21,9 +22,10 @@ PICK_SCHEMA = {
             "items": {
                 "type": "object",
                 "additionalProperties": False,
-                "required": ["url", "snippet"],
+                "required": ["url", "published_date", "snippet"],
                 "properties": {
                     "url": {"type": "string"},
+                    "published_date": {"type": ["string", "null"]},
                     "snippet": {"type": "string"},
                 },
             },
@@ -31,13 +33,16 @@ PICK_SCHEMA = {
     },
 }
 
-PROMPT = """Run exactly one web search with this query: {query}
+PROMPT = """Today is {today}. Run exactly one web search with this query: {query}
 
-Look for news or official press releases from the last {days} days about how early \
+Look for news or official press releases published on or after {cutoff} about how early \
 warnings were provided for natural hazards: forecasts, warnings issued, how they were \
 communicated, evacuations or other actions taken, and outcomes.
-Then list the relevant search results. For each, give its exact URL and a factual \
-1-2 sentence snippet in the article's original language, based only on the search result."""
+Then list the relevant search results. For each, give its exact URL, its publication \
+date (YYYY-MM-DD) as shown in the search result, and a factual 1-2 sentence snippet in the \
+article's original language, based only on the search result.
+Leave out results published before {cutoff} and results whose date you cannot see \
+(use null only if you include it by mistake)."""
 
 
 def parse_message(message) -> list:
@@ -63,6 +68,9 @@ def collect(source: dict, ctx) -> list:
     cfg = ctx.config.settings["web_search"]
     lang = ctx.config.languages[source["language"]]
     days = ctx.config.settings["collect"]["lookback_days"]
+    now = datetime.now(timezone.utc)
+    today = now.strftime("%Y-%m-%d")
+    cutoff = (now - timedelta(days=days)).strftime("%Y-%m-%d")
     items = []
     for query in lang.get("web_search", {}).get("queries", []):
         ctx.budget.check(cfg["max_searches_per_query"] * ctx.config.settings["budget"]["web_search_usd"]
@@ -75,7 +83,7 @@ def collect(source: dict, ctx) -> list:
                            "format": {"type": "json_schema", "schema": PICK_SCHEMA}},
             tools=[{"type": "web_search_20250305", "name": "web_search",
                     "max_uses": cfg["max_searches_per_query"]}],
-            messages=[{"role": "user", "content": PROMPT.format(query=query, days=days)}],
+            messages=[{"role": "user", "content": PROMPT.format(query=query, today=today, cutoff=cutoff)}],
         )
         ctx.budget.record("web_search", cfg["model"], usage_dict(message.usage),
                           web_search_count(message.usage))
@@ -84,12 +92,15 @@ def collect(source: dict, ctx) -> list:
             r = results.get(p.get("url"))
             if not r:
                 continue  # not in the real search results: ignore
+            published = parse_date(r.get("page_age")) or parse_date(p.get("published_date"))
+            if not published or published[:10] < cutoff:
+                continue  # undated or too old: would show up as "new" otherwise
             items.append({
                 "url": p["url"],
                 "title": clean_text(r["title"], 400),
                 "source_name": None,
                 "language": source["language"],
-                "published_at": parse_date(r.get("page_age")),
+                "published_at": published,
                 "snippet": clean_text(p.get("snippet")),
             })
     return items

@@ -73,3 +73,29 @@ def test_extract_meta_description():
 def test_gdelt_title_tidy():
     assert gdelt.tidy_title("GLOF system at 4 , 100 - metre - high glacier") == "GLOF system at 4,100-metre-high glacier"
     assert gdelt.tidy_title("Super Niño 2026 : crece") == "Super Niño 2026: crece"
+
+
+def test_websearch_keeps_only_real_recent_results(config):
+    from datetime import datetime, timedelta, timezone
+    from types import SimpleNamespace as NS
+    from ews_news.collectors import websearch
+
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    old = (datetime.now(timezone.utc) - timedelta(days=60)).strftime("%Y-%m-%d")
+    picks = {"articles": [
+        {"url": "https://a.example/new", "published_date": today, "snippet": "気象庁が特別警報を発表。"},
+        {"url": "https://a.example/old", "published_date": old, "snippet": "old"},
+        {"url": "https://a.example/undated", "published_date": None, "snippet": "?"},
+        {"url": "https://invented.example/x", "published_date": today, "snippet": "not in results"},
+    ]}
+    results = [NS(type="web_search_result", url=u, title="T " + u, page_age=None)
+               for u in ("https://a.example/new", "https://a.example/old", "https://a.example/undated")]
+    message = NS(content=[NS(type="web_search_tool_result", content=results),
+                          NS(type="text", text=json.dumps(picks))],
+                 usage=NS(input_tokens=1, output_tokens=1, cache_read_input_tokens=0,
+                          cache_creation_input_tokens=0, server_tool_use=NS(web_search_requests=1)))
+    budget = NS(check=lambda e: None, cost=lambda *a, **k: 0.0, record=lambda *a, **k: 0.0)
+    ctx = NS(config=config, anthropic=NS(messages=NS(create=lambda **k: message)), budget=budget)
+    items = websearch.collect(config.source("websearch_ja"), ctx)
+    assert [i["url"] for i in items] == ["https://a.example/new"]
+    assert items[0]["snippet"] == "気象庁が特別警報を発表。"

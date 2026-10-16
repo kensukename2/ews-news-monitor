@@ -51,7 +51,9 @@ III South America, IV North/Central America and Caribbean, V South-West Pacific,
 hydrological service (e.g. JMA, IMD, PAGASA, AEMET, SENAMHI); RSMC = when acting as a WMO \
 regional centre (e.g. RSMC Tokyo, RSMC Miami/NHC, RSMC New Delhi, RSMC Nadi); \
 other_national_agency = civil protection, disaster management, river authorities etc.; \
-international = UN, WMO, IFRC, regional bodies; NGO; media.
+international = UN, WMO, IFRC, regional bodies; NGO; media (only when the media outlet \
+itself relayed warnings, e.g. a broadcaster); other (e.g. telecom operators). Do not list \
+the outlet that merely published the article.
 - ew4all_pillars: Early Warnings for All pillars touched: 1 risk knowledge; 2 detection, \
 monitoring, analysis and forecasting; 3 warning dissemination and communication; \
 4 preparedness and response.
