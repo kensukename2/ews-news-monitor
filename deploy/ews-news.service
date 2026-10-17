@@ -1,0 +1,21 @@
+# Daily EWS / AI news pipeline. Installed to /etc/systemd/system/.
+# Started by ews-news.timer; run by hand with: sudo systemctl start ews-news.service
+[Unit]
+Description=EWS / AI News daily pipeline (knaito.xyz)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=ewsnews
+Group=ewsnews
+WorkingDirectory=/opt/ews-news-monitor
+ExecStart=/opt/ews-news-monitor/scripts/server_run.sh
+TimeoutStartSec=2h
+Nice=10
+# The job cannot modify anything outside its own folder and home.
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/opt/ews-news-monitor /var/lib/ewsnews
+PrivateTmp=true
+NoNewPrivileges=true

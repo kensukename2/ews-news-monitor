@@ -1,0 +1,13 @@
+# Runs ews-news.service every day at 05:00 Swiss time (summer and winter time).
+# Persistent=true: if the server was off at 05:00, the job runs at the next boot.
+# Check with: systemctl list-timers ews-news.timer
+[Unit]
+Description=Daily EWS / AI News pipeline at 05:00 Europe/Zurich
+
+[Timer]
+OnCalendar=*-*-* 05:00:00 Europe/Zurich
+Persistent=true
+RandomizedDelaySec=0
+
+[Install]
+WantedBy=timers.target
