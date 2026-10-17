@@ -29,6 +29,16 @@ CANDIDATES:
 Answer with the candidate's story_id, or null if none is the same story."""
 
 
+def _who(d: dict) -> str:
+    """Organisations and named systems/events, which identify a story best."""
+    orgs = d.get("institutions") or d.get("agencies") or []
+    names = [o.get("short_name") or o["name"] for o in orgs]
+    names += d.get("system_names") or ([d["system_name"]] if d.get("system_name") else [])
+    if d.get("event_name"):
+        names.append(d["event_name"])
+    return ", ".join(dict.fromkeys(names))
+
+
 class StoryMatcher:
     def __init__(self, config, budget, client):
         self.model = config.settings["classify"]["model"]
@@ -41,9 +51,11 @@ class StoryMatcher:
         self.budget.check(self.budget.cost(self.model, {"input_tokens": 1500, "output_tokens": 50}))
         cand_text = "\n".join(json.dumps({
             "story_id": c["story_id"], "title": c["title"], "date": c.get("event_date"),
-            "summary": (c.get("summary_en") or "")[:300]}, ensure_ascii=False) for c in candidates)
+            "who": _who(c), "summary": (c.get("summary_en") or "")[:300]},
+            ensure_ascii=False) for c in candidates)
         art_text = json.dumps({"title": article["title_en"], "date": article.get("event_date"),
-                               "summary": article.get("summary_en", "")[:400]}, ensure_ascii=False)
+                               "who": _who(article), "summary": article.get("summary_en", "")[:400]},
+                              ensure_ascii=False)
         response = self.client.messages.create(
             model=self.model,
             max_tokens=100,

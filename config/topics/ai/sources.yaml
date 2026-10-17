@@ -89,7 +89,7 @@ en:
     name: GDELT (English)
     type: gdelt
     language: en
-    prefilter: loose
+    prefilter: strict
     agency_type: media
     enabled: true
 
@@ -277,7 +277,7 @@ ja:
     name: GDELT (Japanese)
     type: gdelt
     language: ja
-    prefilter: loose
+    prefilter: strict
     agency_type: media
     enabled: true
 
@@ -297,7 +297,7 @@ es:
     name: GDELT (Spanish)
     type: gdelt
     language: es
-    prefilter: loose
+    prefilter: strict
     agency_type: media
     enabled: true
 

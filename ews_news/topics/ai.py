@@ -180,10 +180,16 @@ def event_key(c: dict, country_names: dict = None):
 
 
 def candidate_ok(c: dict, story: dict) -> bool:
-    """Shares an institution or the AI system name with the story."""
+    """Shares an institution or the AI system name with the story. If either the
+    article or the story names neither, the same area is enough (Claude decides)."""
     if c.get("system_name") and _norm(c["system_name"]) in {_norm(s) for s in story["system_names"]}:
         return True
-    return bool(_inst_keys(c.get("institutions")) & _inst_keys(story["institutions"]))
+    insts, story_insts = _inst_keys(c.get("institutions")), _inst_keys(story["institutions"])
+    if insts & story_insts:
+        return True
+    vague = not insts and not c.get("system_name")
+    vague_story = not story_insts and not story["system_names"]
+    return (vague or vague_story) and category(c) in story["areas"]
 
 
 # -------------------------------------------------------------- story fields

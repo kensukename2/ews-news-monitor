@@ -119,3 +119,17 @@ def test_cross_language_story_and_publish(ai_config):
     assert story["system_names"] == ["AIFS"]
     assert story["news_type"] == "operational_implementation"
     assert story["value_added"].startswith("Forecasts in minutes")
+
+
+def test_vague_article_can_match_same_area():
+    story = {"system_names": [], "areas": ["forecasting"],
+             "institutions": [{"name": "MIT", "short_name": "MIT", "type": "research", "country": "US"}]}
+    vague = sample(system_name=None, institutions=[])
+    assert ai.candidate_ok(vague, story)
+    assert not ai.candidate_ok(sample(system_name=None, institutions=[], primary_area="hydrology",
+                                      areas=["hydrology"]), story)
+
+
+def test_specific_article_can_join_vague_story():
+    vague_story = {"system_names": [], "areas": ["forecasting"], "institutions": []}
+    assert ai.candidate_ok(sample(system_name=None), vague_story)
