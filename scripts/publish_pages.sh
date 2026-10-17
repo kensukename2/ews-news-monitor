@@ -10,7 +10,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 tmp=$(mktemp -d)
-index=$(mktemp)
+index="$tmp.index"   # must not exist yet: git creates it
 trap 'rm -rf "$tmp" "$index"' EXIT
 
 cp -r site/. "$tmp/"
