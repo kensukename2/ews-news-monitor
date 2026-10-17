@@ -1,13 +1,8 @@
-# General pipeline settings. Paths are relative to the repository root.
+# Settings shared by all topics. Paths are relative to the repository root.
+# Each topic (config/topics/<topic>/topic.yaml) can override any of these.
 
 timezone: Europe/Zurich
 user_agent: "ews-news-monitor/0.1 (+https://knaito.xyz/ews_news)"
-
-paths:
-  database: state/ews.sqlite        # working SQLite database
-  db_dump: state/ews.sql            # text dump committed to the `data` branch
-  run_logs: state/logs              # one JSON log per run
-  site_data: site/ews_news/data     # JSON files read by the web page
 
 collect:
   lookback_days: 3          # ignore items published earlier than this
@@ -26,8 +21,8 @@ web_search:
   max_searches_per_query: 1   # each search costs $0.01
 
 budget:
-  monthly_usd: 5.0
   # USD per million tokens / per search, used to log and cap spending.
+  # The monthly cap itself is set per topic in topic.yaml.
   prices:
     claude-haiku-5-5: {input: 0.10, output: 0.50, cache_read: 0.01, cache_write: 0.125}
   web_search_usd: 0.01
@@ -38,5 +33,4 @@ cluster:
   min_title_similarity: 0.3   # fallback without Claude: 0-1 overlap of English title words
 
 publish:
-  stories_per_month_file: true
   stale_after_hours: 30   # page shows a warning if the last successful run is older

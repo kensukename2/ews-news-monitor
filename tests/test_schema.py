@@ -6,31 +6,33 @@ from types import SimpleNamespace
 from conftest import sample_classification
 
 from ews_news.classify import Classifier, postprocess
-from ews_news.schema import CLASSIFICATION_SCHEMA, validate
+from ews_news.schema import validate
+from ews_news.topics import ews
+from ews_news.topics.ews import SCHEMA as CLASSIFICATION_SCHEMA
 
 
 def test_valid_sample_passes():
-    assert validate(sample_classification()) == []
+    assert validate(sample_classification(), CLASSIFICATION_SCHEMA) == []
 
 
 def test_missing_and_extra_fields_fail():
     d = sample_classification()
     del d["outcome"]
     d["extra"] = 1
-    errors = validate(d)
+    errors = validate(d, CLASSIFICATION_SCHEMA)
     assert any("missing 'outcome'" in e for e in errors)
     assert any("unexpected 'extra'" in e for e in errors)
 
 
 def test_enum_and_type_errors():
-    assert validate(sample_classification(hazard="zombies"))
-    assert validate(sample_classification(ew4all_pillars=[5]))
-    assert validate(sample_classification(confidence="high"))
-    assert validate(sample_classification(relevant=1))  # must be a real boolean
+    assert validate(sample_classification(hazard="zombies"), CLASSIFICATION_SCHEMA)
+    assert validate(sample_classification(ew4all_pillars=[5]), CLASSIFICATION_SCHEMA)
+    assert validate(sample_classification(confidence="high"), CLASSIFICATION_SCHEMA)
+    assert validate(sample_classification(relevant=1), CLASSIFICATION_SCHEMA)  # must be a real boolean
 
 
 def test_nullable_fields_accept_null():
-    assert validate(sample_classification(event_name=None, lead_time_hours=None)) == []
+    assert validate(sample_classification(event_name=None, lead_time_hours=None), CLASSIFICATION_SCHEMA) == []
 
 
 def test_schema_is_strict_everywhere():
@@ -51,6 +53,7 @@ def test_postprocess_fills_regions_and_review(config):
     d = postprocess(sample_classification(countries=["in", "JP "], confidence=0.4,
                                           wmo_regions=["VI"]),
                     item, config.countries, threshold=0.6)
+    d = ews.postprocess(d, item)
     assert d["countries"] == ["IN", "JP"]
     assert d["wmo_regions"] == ["II", "VI"]
     assert d["ew4all_pillars"] == [2, 3, 4]

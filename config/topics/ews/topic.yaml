@@ -1,0 +1,15 @@
+# EWS News: how early warning services were provided during hazardous events.
+# Page: https://knaito.xyz/ews_news/
+# Any key from config/settings.yaml can be overridden here.
+
+name: EWS News
+module: ews             # Python module in ews_news/topics/ (prompt, schema, story fields)
+
+paths:
+  database: state/ews.sqlite        # working SQLite database
+  db_dump: state/ews.sql            # text dump committed to the `data` branch
+  run_logs: state/logs              # one JSON log per run
+  site_data: site/ews_news/data     # JSON files read by the web page
+
+budget:
+  monthly_usd: 5.0

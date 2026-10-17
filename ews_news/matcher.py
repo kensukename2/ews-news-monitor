@@ -16,10 +16,9 @@ MATCH_SCHEMA = {
     "properties": {"story_id": {"type": ["integer", "null"]}},
 }
 
-PROMPT = """Decide whether the ARTICLE reports on the same hazard event as one of the \
-CANDIDATE stories (same event, e.g. the same storm, the same earthquake and its warning, \
-the same flood episode in the same area). Follow-up reports, reactions and investigations \
-about that event count as the same event. A different event of the same type does not.
+PROMPT = """Decide whether the ARTICLE reports on the same story as one of the CANDIDATE \
+stories, i.e. {what}. Follow-up reports, reactions and investigations count as the same \
+story. A different event or development of the same type does not.
 
 ARTICLE:
 {article}
@@ -27,12 +26,13 @@ ARTICLE:
 CANDIDATES:
 {candidates}
 
-Answer with the candidate's story_id, or null if none is the same event."""
+Answer with the candidate's story_id, or null if none is the same story."""
 
 
 class StoryMatcher:
     def __init__(self, config, budget, client):
         self.model = config.settings["classify"]["model"]
+        self.what = config.module.MATCH_WHAT
         self.budget = budget
         self.client = client
 
@@ -50,8 +50,8 @@ class StoryMatcher:
             thinking={"type": "disabled"},
             output_config={"effort": "low",
                            "format": {"type": "json_schema", "schema": MATCH_SCHEMA}},
-            messages=[{"role": "user", "content": PROMPT.format(article=art_text,
-                                                                 candidates=cand_text)}],
+            messages=[{"role": "user", "content": PROMPT.format(
+                what=self.what, article=art_text, candidates=cand_text)}],
         )
         self.budget.record("cluster", self.model, usage_dict(response.usage))
         text = next((b.text for b in response.content if b.type == "text"), "{}")

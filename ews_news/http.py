@@ -21,6 +21,9 @@ class PoliteSession:
         self.session.headers["User-Agent"] = user_agent
         self._robots: Dict[str, urllib.robotparser.RobotFileParser] = {}
         self._last: Dict[str, float] = {}
+        # Successful responses are kept for the rest of the run, so a feed used
+        # by several topics is downloaded only once.
+        self._cache: Dict[tuple, requests.Response] = {}
 
     def _robots_for(self, url: str) -> urllib.robotparser.RobotFileParser:
         parts = urlsplit(url)
@@ -56,6 +59,13 @@ class PoliteSession:
             **kwargs) -> requests.Response:
         if check_robots and not self.allowed(url):
             raise RobotsDisallowed(f"robots.txt disallows {url}")
+        cacheable = not kwargs.get("stream")
+        key = (url, tuple(sorted((kwargs.get("params") or {}).items())))
+        if cacheable and key in self._cache:
+            return self._cache[key]
         self._wait(urlsplit(url).netloc, min_interval or self.min_interval)
         kwargs.setdefault("timeout", self.timeout)
-        return self.session.get(url, **kwargs)
+        r = self.session.get(url, **kwargs)
+        if cacheable and r.status_code == 200:
+            self._cache[key] = r
+        return r

@@ -20,10 +20,15 @@ from .textutil import canonical_url, domain, title_key, utcnow
 log = logging.getLogger("ews_news")
 
 
-def make_context(config, conn, run_id):
+def make_http(config) -> PoliteSession:
     s = config.settings
-    http = PoliteSession(s["user_agent"], s["collect"]["request_timeout"],
+    return PoliteSession(s["user_agent"], s["collect"]["request_timeout"],
                          s["collect"]["min_seconds_per_host"])
+
+
+def make_context(config, conn, run_id, http=None):
+    s = config.settings
+    http = http or make_http(config)
     client = anthropic.Anthropic() if os.environ.get("ANTHROPIC_API_KEY") else None
     return SimpleNamespace(config=config, conn=conn, run_id=run_id, http=http,
                            anthropic=client, budget=Budget(conn, s, run_id))
@@ -187,7 +192,20 @@ def copy_to_duplicates(conn) -> int:
 
 # ------------------------------------------------------------------------- run
 
-def run(config, collect=True, classify=True, only_sources=None) -> dict:
+def run_all(topics, collect=True, classify=True, only_sources=None) -> dict:
+    """Run several topics one after another, sharing one polite HTTP session."""
+    from .config import load_config
+    results, http = {}, None
+    for topic in topics:
+        config = load_config(topic)
+        http = http or make_http(config)
+        db.restore(config.path("database"), config.path("db_dump"))
+        log.info("===== topic %s =====", topic)
+        results[topic] = run(config, collect, classify, only_sources, http=http)
+    return results
+
+
+def run(config, collect=True, classify=True, only_sources=None, http=None) -> dict:
     conn = db.connect(config.path("database"))
     started = utcnow()
     run_id = conn.execute("INSERT INTO runs (started_at, status) VALUES (?, 'running')",
@@ -196,7 +214,7 @@ def run(config, collect=True, classify=True, only_sources=None) -> dict:
     stats = {"sources": [], "classify": {}, "stories_touched": 0, "fatal_error": None}
     status = "success"
     try:
-        ctx = make_context(config, conn, run_id)
+        ctx = make_context(config, conn, run_id, http)
         if collect:
             stats["sources"] = collect_all(ctx, only_sources)
         if classify:
@@ -223,7 +241,7 @@ def run(config, collect=True, classify=True, only_sources=None) -> dict:
     db.dump(conn, config.path("db_dump"))
     write_run_log(config, run_id, started, status, stats)
     conn.close()
-    return {"run_id": run_id, "status": status, **stats}
+    return {"topic": config.topic, "run_id": run_id, "status": status, **stats}
 
 
 def summarize_by_language(sources) -> dict:

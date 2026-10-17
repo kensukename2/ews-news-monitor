@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from conftest import sample_classification
 
 from ews_news import cluster, db, publish
+from ews_news.topics import ews
 from ews_news.budget import Budget, BudgetExceeded
 from ews_news.pipeline import copy_to_duplicates, save_classification, store_item
 
@@ -30,13 +31,13 @@ def test_store_dedup_by_url_and_headline(tmp_config):
 
 
 def test_event_key_cross_language():
-    a = cluster.event_key(sample_classification(event_name="Hurricane Melissa", hazard="tropical_cyclone"))
-    b = cluster.event_key(sample_classification(event_name="Major Hurricane Melissa (2026)",
+    a = ews.event_key(sample_classification(event_name="Hurricane Melissa", hazard="tropical_cyclone"))
+    b = ews.event_key(sample_classification(event_name="Major Hurricane Melissa (2026)",
                                                 hazard="storm_surge"))
     assert a == b == "named|melissa"
-    c = cluster.event_key(sample_classification(event_name=None, hazard="flash_flood",
+    c = ews.event_key(sample_classification(event_name=None, hazard="flash_flood",
                                                 countries=["PE"], event_location="Piura, Peru"))
-    d = cluster.event_key(sample_classification(event_name=None, hazard="flood",
+    d = ews.event_key(sample_classification(event_name=None, hazard="flood",
                                                 countries=["PE"], event_location="Piura"))
     assert c == d == "flood|PE|piura"
 
@@ -193,6 +194,6 @@ def test_matcher_joins_cross_language_and_falls_back(tmp_config):
 
 def test_vague_location_has_no_key():
     names = {"JP": "Japan"}
-    assert cluster.event_key(sample_classification(event_name=None, event_location=None), names) is None
-    assert cluster.event_key(sample_classification(event_name=None, countries=["JP"],
+    assert ews.event_key(sample_classification(event_name=None, event_location=None), names) is None
+    assert ews.event_key(sample_classification(event_name=None, countries=["JP"],
                                                    event_location="Japan"), names) is None

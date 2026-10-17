@@ -41,13 +41,11 @@ def publish(conn, config) -> dict:
         s["first_seen_local"] = local_time(s["first_seen"], tz)
         s["is_new"] = s["first_seen_local"][:10] == today_local
         by_month[s["first_seen"][:7]].append(s)
-        facets["hazards"].update(s["hazards"])
-        facets["wmo_regions"].update(s["wmo_regions"])
+        # Values present in the data, for the page's filter menus (see topic FACETS).
+        for facet, field in config.module.FACETS:
+            value = s.get(field)
+            facets[facet].update(value if isinstance(value, list) else [value])
         facets["countries"].update(f"{c['code']}|{c['name']}" for c in s["countries"])
-        facets["agency_types"].update(s["agency_types"])
-        facets["pillars"].update(s["pillars"])
-        facets["outcomes"].add(s["outcome"])
-        facets["languages"].update(s["languages"])
 
     months = []
     for month in sorted(by_month, reverse=True):
@@ -64,6 +62,7 @@ def publish(conn, config) -> dict:
     countries = sorted(facets.pop("countries", set()), key=lambda x: x.split("|")[1])
     manifest = {
         "schema_version": SCHEMA_VERSION,
+        "topic": config.topic,
         "generated_at": now,
         "generated_at_local": local_time(now, tz),
         "timezone": tz,
@@ -80,7 +79,7 @@ def publish(conn, config) -> dict:
         "new_today": sum(1 for m in by_month.values() for s in m if s["is_new"]),
         "months": months,
         "facets": {
-            **{k: sorted(v, key=str) for k, v in facets.items()},
+            **{k: sorted((x for x in v if x is not None), key=str) for k, v in facets.items()},
             "countries": [{"code": c.split("|")[0], "name": c.split("|")[1]} for c in countries],
         },
     }
