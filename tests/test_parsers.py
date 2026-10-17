@@ -152,3 +152,17 @@ def test_find_date_formats():
 def test_placeholder_meta_description_ignored():
     html = '<meta name="description" content="description"><meta property="og:description" content="短い">'
     assert extract_description(html) == ""
+
+
+def test_rss_collect_reports_non_feed_page():
+    from types import SimpleNamespace as NS
+    page = b"<html><head><title>Just a moment...</title></head><body>Checking your browser</body></html>"
+    resp = NS(content=page, text=page.decode(), headers={"content-type": "text/html"},
+              raise_for_status=lambda: None)
+    ctx = NS(http=NS(get=lambda url: resp))
+    try:
+        rss.collect({"url": "https://x/rss.xml", "name": "x", "language": "en"}, ctx)
+    except ValueError as e:
+        assert "not a feed" in str(e) and "text/html" in str(e)
+    else:
+        raise AssertionError("HTML page accepted as a feed")
