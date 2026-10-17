@@ -1,48 +1,33 @@
-# Daily pipeline + deployment of knaito.xyz (GitHub Pages).
+# Republish knaito.xyz after code changes.
 #
-# * Scheduled: triggered several times between 03:07 and 05:37 UTC (GitHub often
-#   delays schedules, especially on the full hour); `daily-gate` lets exactly
-#   one run through per day at or after 05:00 Europe/Zurich (summer and winter).
-# * Topics: every folder in config/topics/ (EWS News, AI News) is run in turn.
-# * Manual: Actions tab -> "Daily EWS news" -> Run workflow.
-# * Push to main: redeploys the site with the existing data (no new collection).
+# The daily pipeline runs on the Hetzner server (scripts/server_run.sh,
+# started by deploy/ews-news.timer at 05:00 Europe/Zurich). The server saves
+# its state to the `data` branch and publishes the site to the `gh-pages`
+# branch, which GitHub Pages serves.
 #
-# State (SQLite text dumps, run logs, published JSON) lives on the `data` branch.
-name: Daily EWS news
+# This workflow does NOT collect or classify news. It only rebuilds the page
+# data from the saved state and republishes the site, so that changes to the
+# pages (site/) or code are visible without waiting for the next daily run.
+# * Push to main: runs automatically.
+# * Manual: Actions tab -> "Republish site" -> Run workflow.
+name: Republish site
 
 on:
-  schedule:
-    - cron: "7 3 * * *"
-    - cron: "37 3 * * *"
-    - cron: "7 4 * * *"
-    - cron: "37 4 * * *"
-    - cron: "7 5 * * *"
-    - cron: "37 5 * * *"
-  workflow_dispatch:
-    inputs:
-      run_pipeline:
-        description: "Collect and classify new items (false = only redeploy the site)"
-        type: boolean
-        default: true
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
-  contents: write   # push to the data branch
-  pages: write
-  id-token: write
+  contents: write   # push to the gh-pages branch
 
 concurrency:
   group: ews-news
   cancel-in-progress: false
 
 jobs:
-  update:
+  publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
 
@@ -53,84 +38,13 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: Check out the data branch into state/
+      - name: Check out the saved state (data branch) into state/
         run: |
-          git config user.name "ews-news-bot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if git fetch --depth=1 origin data:data; then
-            git worktree add state data
-          else
-            git worktree add --orphan -b data state
-          fi
-          grep -qx '\*.sqlite' state/.gitignore 2>/dev/null || printf '*.sqlite\n' >> state/.gitignore
+          git fetch --depth=1 origin data:data
+          git worktree add state data
 
-      - name: Decide whether to run the pipeline
-        id: gate
-        run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            echo "run=false" >> "$GITHUB_OUTPUT"
-          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "run=${{ inputs.run_pipeline }}" >> "$GITHUB_OUTPUT"
-          elif python -m ews_news daily-gate; then
-            echo "run=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "run=false" >> "$GITHUB_OUTPUT"
-          fi
+      - name: Rebuild page data from the saved state
+        run: python -m ews_news publish
 
-      - name: Run pipeline
-        id: pipeline
-        if: steps.gate.outputs.run == 'true'
-        continue-on-error: true   # still publish, so the page can show the failure
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          RELIEFWEB_APPNAME: ${{ secrets.RELIEFWEB_APPNAME }}
-        run: python -m ews_news run
-
-      - name: Save state to the data branch
-        if: steps.gate.outputs.run == 'true'
-        run: |
-          rm -f state/published/*.json   # files from the old single-topic layout
-          for page in ews_news ai_news; do
-            if [ -d "site/$page/data" ]; then
-              mkdir -p "state/published/$page"
-              cp -r "site/$page/data/." "state/published/$page/"
-            fi
-          done
-          cd state
-          git add -A
-          if ! git diff --cached --quiet; then
-            git commit -q -m "Data update $(date -u +%Y-%m-%dT%H:%MZ)"
-            git push origin data
-          fi
-
-      - name: Rebuild page data from saved state (no new collection)
-        if: steps.gate.outputs.run != 'true'
-        run: |
-          python -m ews_news publish   # each topic restores its database dump if present
-
-      - name: Skip deployment on scheduled runs that did not run
-        id: should_deploy
-        run: |
-          if [ "${{ github.event_name }}" = "schedule" ] && [ "${{ steps.gate.outputs.run }}" != "true" ]; then
-            echo "deploy=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "deploy=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - uses: actions/configure-pages@v5
-        if: steps.should_deploy.outputs.deploy == 'true'
-
-      - uses: actions/upload-pages-artifact@v4
-        if: steps.should_deploy.outputs.deploy == 'true'
-        with:
-          path: site
-
-      - id: deploy
-        if: steps.should_deploy.outputs.deploy == 'true'
-        uses: actions/deploy-pages@v4
-
-      - name: Fail the job if the pipeline failed (sends you an e-mail)
-        if: steps.pipeline.outcome == 'failure'
-        run: |
-          echo "Pipeline failed; the page shows the failure notice. See the 'Run pipeline' step log."
-          exit 1
+      - name: Publish to gh-pages
+        run: scripts/publish_pages.sh
