@@ -1,0 +1,72 @@
+# AI News - Spanish.
+# fold_accents: true means "prediccion" and "predicción" both match.
+code: es
+name: Español (Spanish)
+word_boundaries: true
+fold_accents: true
+
+prefilter:
+  require_groups: [ai_terms, domain_terms]
+  loose_groups: [ai_terms]
+  strong_terms:
+    - IA meteorológica
+    - modelo de IA meteorológico
+    - pronóstico con IA
+    - pronósticos con inteligencia artificial
+    - predicción meteorológica con IA
+    - alerta temprana con IA
+    - alerta temprana con inteligencia artificial
+  ai_terms:
+    - IA
+    - inteligencia artificial
+    - aprendizaje automático
+    - aprendizaje profundo
+    - redes neuronales
+    - red neuronal
+    - IA generativa
+    - modelo de lenguaje
+    - chatbot
+    - visión artificial
+    - machine learning
+  domain_terms:
+    - meteorología
+    - meteorológico
+    - meteorológica
+    - clima
+    - climático
+    - pronóstico
+    - pronósticos
+    - predicción
+    - tiempo atmosférico
+    - lluvias
+    - inundaciones
+    - inundación
+    - sequía
+    - huracán
+    - tormenta
+    - alerta temprana
+    - alertas tempranas
+    - desastres
+    - emergencias
+    - hidrológico
+    - satélite
+    - radar
+    - AEMET
+    - SENAMHI
+    - IDEAM
+    - SMN
+  exclude_terms:
+    - bolsa de valores
+    - fútbol
+    - videojuego
+
+gdelt:
+  sourcelang: spanish
+  queries:
+    - '("artificial intelligence" OR "machine learning" OR AI) (weather OR meteorological OR "early warning" OR flood OR hurricane)'
+
+# Claude web search queries (one search, about $0.011, per query per run).
+# Placeholders: {today}, {month_en}, {month_ja}, {month_es}
+web_search:
+  queries:
+    - "noticias {month_es} inteligencia artificial pronóstico meteorológico OR alerta temprana OR servicio meteorológico"

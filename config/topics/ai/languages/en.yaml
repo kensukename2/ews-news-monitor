@@ -1,0 +1,103 @@
+# AI News - English.
+# Strict pre-filter: an item needs an AI term AND a domain term (weather,
+# water, climate, early warning, disasters), or one strong term.
+code: en
+name: English
+word_boundaries: true
+fold_accents: false
+
+prefilter:
+  require_groups: [ai_terms, domain_terms]
+  loose_groups: [ai_terms]
+  strong_terms:
+    - AI weather model
+    - AI weather forecast
+    - AI weather forecasting
+    - AI forecasting model
+    - AI-based forecast
+    - machine learning weather
+    - machine-learning weather
+    - data-driven weather
+    - AI climate model
+    - AIFS
+    - GraphCast
+    - GenCast
+    - FourCastNet
+    - Pangu-Weather
+    - Aurora weather
+    - NeuralGCM
+    - Earth-2
+    - WeatherNext
+    - AI early warning
+    - AI-powered early warning
+    - AI flood forecasting
+    - AI nowcasting
+  ai_terms:
+    - AI
+    - A.I.
+    - artificial intelligence
+    - machine learning
+    - machine-learning
+    - deep learning
+    - neural network
+    - neural networks
+    - foundation model
+    - large language model
+    - LLM
+    - generative AI
+    - GenAI
+    - chatbot
+    - computer vision
+    - data-driven model
+  domain_terms:
+    - weather
+    - meteorological
+    - meteorology
+    - forecast
+    - forecasts
+    - forecasting
+    - nowcasting
+    - climate
+    - hydrological
+    - hydrology
+    - flood
+    - floods
+    - flooding
+    - drought
+    - cyclone
+    - hurricane
+    - typhoon
+    - storm
+    - rainfall
+    - precipitation
+    - heatwave
+    - early warning
+    - early warnings
+    - disaster
+    - disasters
+    - satellite
+    - radar
+    - NMHS
+    - WMO
+    - ECMWF
+    - Met Office
+    - NOAA
+    - National Weather Service
+    - EUMETSAT
+  exclude_terms:
+    - stock market
+    - earnings call
+    - crypto
+    - video game
+    - smartphone review
+
+gdelt:
+  sourcelang: english
+  queries:
+    - '("artificial intelligence" OR "machine learning" OR "AI model" OR "deep learning") (weather OR meteorological OR "early warning" OR hydrological OR "flood forecasting")'
+
+# Claude web search queries (one search, about $0.011, per query per run).
+# Placeholders: {today}, {month_en}, {month_ja}, {month_es}
+web_search:
+  queries:
+    - "{month_en} news AI weather forecasting model meteorological service OR early warning OR flood forecasting"

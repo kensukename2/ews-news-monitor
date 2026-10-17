@@ -1,0 +1,359 @@
+# AI News sources, grouped by language. Same fields as
+# config/topics/ews/sources.yaml (see the explanation at the top of that file).
+#
+# Most sources here are broad (tech news, all agency news), so they use the
+# strict pre-filter: an AI term AND a weather/water/climate/EWS term.
+# Feeds that EWS News also reads are downloaded only once per run.
+#
+# Test all feeds with:  python -m ews_news --topic ai check-sources --all
+
+international:
+  - id: wmo_press
+    name: WMO press releases
+    type: html_links
+    url: https://wmo.int/news/media-centre
+    link_pattern: '^/news/media-centre/(?!information-journalists)[a-z0-9-]{15,}'
+    strip_pattern: '^Press Release \d{1,2} \w+ \d{4}\s*'
+    language: en
+    prefilter: strict
+    agency_type: international
+    enabled: true
+
+  - id: wmo_news
+    name: WMO news
+    type: html_links
+    url: https://wmo.int/news
+    link_pattern: '^/media/news/[a-z0-9-]{10,}'
+    strip_pattern: '^News \d{1,2} \w+ \d{4}\s*'
+    language: en
+    prefilter: strict
+    agency_type: international
+    enabled: true
+
+  - id: ecmwf
+    name: ECMWF news
+    type: rss
+    url: https://www.ecmwf.int/rss.xml
+    language: en
+    prefilter: loose          # ECMWF news is all meteorology: one AI term is enough
+    agency_type: international
+    enabled: true
+
+  - id: eumetsat
+    name: EUMETSAT news
+    type: rss
+    url: https://www.eumetsat.int/rss.xml
+    language: en
+    prefilter: loose
+    agency_type: international
+    enabled: true
+
+  - id: itu_ai4good
+    name: ITU AI for Good
+    type: rss
+    url: https://aiforgood.itu.int/feed/
+    language: en
+    prefilter: strict
+    agency_type: international
+    enabled: true
+
+  - id: preventionweb
+    name: PreventionWeb
+    type: rss
+    url: https://www.preventionweb.net/rss.xml
+    language: en
+    prefilter: loose
+    agency_type: international
+    enabled: true
+
+  - id: undrr
+    name: UNDRR news
+    type: rss
+    url: https://www.undrr.org/rss.xml
+    language: en
+    prefilter: loose
+    agency_type: international
+    enabled: true
+
+  - id: reliefweb_ai
+    name: ReliefWeb ("artificial intelligence")
+    type: rss
+    url: https://reliefweb.int/updates/rss.xml?search=%22artificial%20intelligence%22
+    language: en
+    prefilter: strict
+    agency_type: international
+    enabled: true
+
+en:
+  - id: gdelt_en
+    name: GDELT (English)
+    type: gdelt
+    language: en
+    prefilter: loose
+    agency_type: media
+    enabled: true
+
+  - id: websearch_en
+    name: Claude web search (English)
+    type: claude_search
+    language: en
+    prefilter: relaxed
+    agency_type: media
+    enabled: true
+
+  - id: noaa_news
+    name: NOAA news
+    type: rss
+    url: https://www.noaa.gov/rss.xml
+    language: en
+    prefilter: loose
+    agency_type: NMHS
+    enabled: true
+
+  - id: metoffice_news
+    name: UK Met Office news
+    type: html_links
+    url: https://www.metoffice.gov.uk/about-us/news-and-media/media-centre/weather-and-climate-news
+    link_pattern: '/weather-and-climate-news/20\d\d/'
+    strip_pattern: '^Latest\s+'
+    language: en
+    prefilter: loose
+    agency_type: NMHS
+    enabled: true
+
+  - id: deepmind
+    name: Google DeepMind blog
+    type: rss
+    url: https://deepmind.google/blog/rss.xml
+    language: en
+    prefilter: strict
+    agency_type: private_sector
+    enabled: true
+
+  - id: google_research
+    name: Google Research blog
+    type: rss
+    url: https://research.google/blog/rss/
+    language: en
+    prefilter: strict
+    agency_type: private_sector
+    enabled: true
+
+  - id: nvidia_blog
+    name: NVIDIA blog
+    type: rss
+    url: https://blogs.nvidia.com/feed/
+    language: en
+    prefilter: strict
+    agency_type: private_sector
+    enabled: true
+
+  - id: msr_blog
+    name: Microsoft Research blog
+    type: rss
+    url: https://www.microsoft.com/en-us/research/feed/
+    language: en
+    prefilter: strict
+    agency_type: private_sector
+    enabled: true
+
+  - id: eos
+    name: Eos (AGU)
+    type: rss
+    url: https://eos.org/feed
+    language: en
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: phys_earth
+    name: Phys.org Earth news
+    type: rss
+    url: https://phys.org/rss-feed/earth-news/
+    language: en
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: theverge_ai
+    name: The Verge - AI
+    type: rss
+    url: https://www.theverge.com/rss/ai-artificial-intelligence/index.xml
+    language: en
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: hpcwire
+    name: HPCwire
+    type: rss
+    url: https://www.hpcwire.com/feed/
+    language: en
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: bbc_science
+    name: BBC News Science & Environment
+    type: rss
+    url: https://feeds.bbci.co.uk/news/science_and_environment/rss.xml
+    language: en
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - {id: noaa_research, name: NOAA Research, type: rss, language: en, enabled: false,
+     notes: "research.noaa.gov returns HTTP 403 to automated clients."}
+  - {id: dwd, name: Deutscher Wetterdienst, type: rss, language: en, enabled: false,
+     notes: "No RSS feed found (German-language site; consider adding German later)."}
+  - {id: nasa_science, name: NASA Earth science, type: rss, language: en, enabled: false,
+     notes: "science.nasa.gov/feed/ is not a feed."}
+
+ja:
+  - id: jma_press
+    name: 気象庁 報道発表 (JMA)
+    type: jma_press
+    url: https://www.jma.go.jp/jma/press_list.js
+    language: ja
+    prefilter: strict
+    agency_type: NMHS
+    enabled: true
+
+  - id: nhk_news
+    name: NHK ニュース 主要
+    type: rss
+    url: https://news.web.nhk/n-data/conf/na/rss/cat0.xml
+    language: ja
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: nhk_society
+    name: NHK ニュース 社会
+    type: rss
+    url: https://news.web.nhk/n-data/conf/na/rss/cat1.xml
+    language: ja
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: nhk_science
+    name: NHK ニュース 科学・文化
+    type: rss
+    url: https://news.web.nhk/n-data/conf/na/rss/cat3.xml
+    language: ja
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: itmedia_ai
+    name: ITmedia AI+
+    type: rss
+    url: https://rss.itmedia.co.jp/rss/2.0/aiplus.xml
+    language: ja
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: nikkei_xtech
+    name: 日経クロステック
+    type: rss
+    url: https://xtech.nikkei.com/rss/index.rdf
+    language: ja
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: impress_watch
+    name: Impress Watch
+    type: rss
+    url: https://www.watch.impress.co.jp/data/rss/1.0/ipw/feed.rdf
+    language: ja
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: gdelt_ja
+    name: GDELT (Japanese)
+    type: gdelt
+    language: ja
+    prefilter: loose
+    agency_type: media
+    enabled: true
+
+  - id: websearch_ja
+    name: Claude web search (Japanese)
+    type: claude_search
+    language: ja
+    prefilter: relaxed
+    agency_type: media
+    enabled: true
+
+  - {id: weathernews_jp, name: ウェザーニュース, type: rss, language: ja, enabled: false,
+     notes: "No RSS feed found."}
+
+es:
+  - id: gdelt_es
+    name: GDELT (Spanish)
+    type: gdelt
+    language: es
+    prefilter: loose
+    agency_type: media
+    enabled: true
+
+  - id: websearch_es
+    name: Claude web search (Spanish)
+    type: claude_search
+    language: es
+    prefilter: relaxed
+    agency_type: media
+    enabled: true
+
+  - id: aemet_news
+    name: AEMET noticias
+    type: rss
+    url: https://www.aemet.es/es/rss/noticias.rss
+    language: es
+    prefilter: loose
+    agency_type: NMHS
+    enabled: true
+
+  - id: senamhi_pe
+    name: SENAMHI Perú noticias
+    type: html_links
+    url: https://www.gob.pe/institucion/senamhi/noticias
+    link_pattern: '/institucion/senamhi/noticias/\d+'
+    language: es
+    prefilter: loose
+    agency_type: NMHS
+    enabled: true
+
+  - id: elpais_tec
+    name: El País Tecnología
+    type: rss
+    url: https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada
+    language: es
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: xataka
+    name: Xataka
+    type: rss
+    url: https://www.xataka.com/feedburner.xml
+    language: es
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - id: elpais_america
+    name: El País América
+    type: rss
+    url: https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/america/portada
+    language: es
+    prefilter: strict
+    agency_type: media
+    enabled: true
+
+  - {id: agenciasinc, name: Agencia SINC, type: rss, language: es, enabled: false,
+     notes: "RSS URLs return HTTP 404."}

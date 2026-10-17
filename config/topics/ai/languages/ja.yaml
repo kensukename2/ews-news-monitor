@@ -1,0 +1,72 @@
+# AI News - Japanese.
+# Japanese has no spaces, so matching is substring matching; Latin-letter
+# terms such as "AI" still need boundaries (so "AI" does not match "MAIL").
+code: ja
+name: 日本語 (Japanese)
+word_boundaries: false
+fold_accents: false
+
+prefilter:
+  require_groups: [ai_terms, domain_terms]
+  loose_groups: [ai_terms]
+  strong_terms:
+    - AI気象
+    - AI天気予報
+    - AIによる予報
+    - AI予測モデル
+    - 気象AI
+    - 防災AI
+    - AI防災
+    - 機械学習による予測
+  ai_terms:
+    - AI
+    - 人工知能
+    - 機械学習
+    - 深層学習
+    - ディープラーニング
+    - ニューラルネットワーク
+    - 生成AI
+    - 大規模言語モデル
+    - LLM
+    - チャットボット
+    - 画像認識
+    - 基盤モデル
+  domain_terms:
+    - 気象
+    - 天気
+    - 予報
+    - 予測
+    - 気候
+    - 防災
+    - 災害
+    - 警報
+    - 早期警戒
+    - 洪水
+    - 河川
+    - 水位
+    - 台風
+    - 大雨
+    - 豪雨
+    - 線状降水帯
+    - 土砂災害
+    - 地震
+    - 津波
+    - 気象庁
+    - 気象台
+    - 衛星
+    - レーダー
+  exclude_terms:
+    - 株価
+    - 決算
+
+gdelt:
+  sourcelang: japanese
+  # GDELT matches English machine translations, so keywords are in English.
+  queries:
+    - '("artificial intelligence" OR "machine learning" OR AI) (weather OR forecast OR disaster OR flood OR typhoon)'
+
+# Claude web search queries (one search, about $0.011, per query per run).
+# Placeholders: {today}, {month_en}, {month_ja}, {month_es}
+web_search:
+  queries:
+    - "{month_ja} AI 気象予測 OR 防災 OR 気象庁 ニュース"

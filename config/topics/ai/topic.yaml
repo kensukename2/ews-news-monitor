@@ -1,0 +1,20 @@
+# AI News: how AI supports NMHSs, WMO centres, early warning systems and
+# related national and international institutions.
+# Page: https://knaito.xyz/ai_news/
+# Any key from config/settings.yaml can be overridden here.
+
+name: AI News
+module: ai              # Python module in ews_news/topics/ (prompt, schema, story fields)
+
+paths:
+  database: state/ai.sqlite
+  db_dump: state/ai.sql
+  run_logs: state/logs/ai
+  site_data: site/ai_news/data
+
+budget:
+  monthly_usd: 5.0      # separate from EWS News
+
+cluster:
+  window_days: 10       # same AI system + same kind of news: max days apart
+  similar_days: 5
