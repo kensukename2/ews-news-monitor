@@ -1,0 +1,204 @@
+{
+  "run_id": 2,
+  "started_at": "2026-10-17T08:55:12Z",
+  "status": "success",
+  "sources": [
+    {
+      "source_id": "wmo_press",
+      "language": "en",
+      "fetched": 12,
+      "new_items": 1,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "wmo_news",
+      "language": "en",
+      "fetched": 3,
+      "new_items": 2,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "ecmwf",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 1,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "eumetsat",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 5,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "itu_ai4good",
+      "language": "en",
+      "fetched": 500,
+      "new_items": 4,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "preventionweb",
+      "language": "en",
+      "fetched": 40,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "undrr",
+      "language": "en",
+      "fetched": 40,
+      "new_items": 29,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "reliefweb_ai",
+      "language": "en",
+      "fetched": 20,
+      "new_items": 5,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "noaa_news",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 2,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "deepmind",
+      "language": "en",
+      "fetched": 100,
+      "new_items": 4,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "google_research",
+      "language": "en",
+      "fetched": 100,
+      "new_items": 1,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "nvidia_blog",
+      "language": "en",
+      "fetched": 18,
+      "new_items": 8,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "msr_blog",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 2,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "eos",
+      "language": "en",
+      "fetched": 15,
+      "new_items": 5,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "jma_press",
+      "language": "ja",
+      "fetched": 40,
+      "new_items": 5,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "itmedia_ai",
+      "language": "ja",
+      "fetched": 20,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "nikkei_xtech",
+      "language": "ja",
+      "fetched": 100,
+      "new_items": 30,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "aemet_news",
+      "language": "es",
+      "fetched": 10,
+      "new_items": 1,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "elpais_tec",
+      "language": "es",
+      "fetched": 21,
+      "new_items": 13,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "xataka",
+      "language": "es",
+      "fetched": 26,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    }
+  ],
+  "classify": {
+    "classified": 6,
+    "relevant": 5,
+    "review": 0,
+    "errors": 0,
+    "copied": 0,
+    "left_pending": 0,
+    "budget_stopped": false,
+    "cost_usd": 0.0015
+  },
+  "stories_touched": 4,
+  "fatal_error": null,
+  "budget": {
+    "spent_month_usd": 0.0449,
+    "allowance_run_usd": 0.3305,
+    "monthly_usd": 5.0
+  },
+  "by_language": {
+    "en": {
+      "fetched": 888,
+      "new_items": 69,
+      "kept": 4,
+      "errors": 0
+    },
+    "ja": {
+      "fetched": 160,
+      "new_items": 35,
+      "kept": 1,
+      "errors": 0
+    },
+    "es": {
+      "fetched": 57,
+      "new_items": 14,
+      "kept": 1,
+      "errors": 0
+    }
+  }
+}
