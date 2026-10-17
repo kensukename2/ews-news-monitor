@@ -119,40 +119,68 @@ needed. (Web-search queries can use `{month_en}`, `{month_ja}`, `{month_es}`,
 
 ## Deployment
 
-The site is served by **GitHub Pages** from this repository with the custom
-domain `knaito.xyz`; `alerts.knaito.xyz` (CAP Composer, on its own server) is
-not affected.
+The site is served by **GitHub Pages** from the `gh-pages` branch of this
+repository, with the custom domain `knaito.xyz`. The daily pipeline runs on
+the **Hetzner server** (the same machine as CAP Composer at
+`alerts.knaito.xyz`, which it does not touch).
 
-`.github/workflows/daily.yml`:
+```
+Hetzner server (05:00 Europe/Zurich)                     GitHub
+  systemd timer ews-news.timer
+    └─ scripts/server_run.sh  (user ewsnews, /opt/ews-news-monitor)
+         1. git pull main            (code)          ◄──── main
+         2. git pull state/          (saved state)   ◄──── data
+         3. python -m ews_news run   (both topics)
+         4. push state/              ────────────────────► data      (ews.sql, ai.sql, logs/, published/)
+         5. scripts/publish_pages.sh ────────────────────► gh-pages  ──► knaito.xyz
+```
 
-* is triggered several times between 03:07 and 05:37 UTC (GitHub often
-  delays scheduled runs); `daily-gate` lets one run through per day at or
-  after **05:00 Europe/Zurich** (summer and winter time);
-* restores the databases from the **`data` branch**, runs both topics,
-  commits the updated database dumps (`ews.sql`, `ai.sql`), run logs
-  (`logs/`) and published JSON back to `data`, and deploys `site/` to
-  GitHub Pages;
-* if the pipeline fails, the site is still deployed with a failure notice
-  and the workflow is marked as failed (GitHub e-mails you);
-* a push to `main` redeploys the site with the existing data;
-* can be started by hand: *Actions → Daily EWS news → Run workflow*.
+* **Daily run:** `deploy/ews-news.timer` starts `deploy/ews-news.service`
+  at 05:00 Swiss time (summer and winter time handled by systemd); if the
+  server was off, it runs at the next boot.
+* **Code changes:** push to `main`. The server picks them up at its next run;
+  the GitHub workflow `.github/workflows/daily.yml` ("Republish site")
+  rebuilds the pages from the saved state right away, so page changes are
+  visible within a minute. The workflow never collects or classifies news.
+* **If a run fails,** the page shows a notice (stale or failed update).
 
-One-time setup:
+### Useful commands on the server
 
-1. Repository *Settings → Secrets and variables → Actions*: add
-   `ANTHROPIC_API_KEY` (and optionally `RELIEFWEB_APPNAME`).
-2. *Settings → Pages*: Source = **GitHub Actions**; custom domain
-   `knaito.xyz`; tick *Enforce HTTPS* once the certificate is issued.
-3. DNS at Porkbun for `knaito.xyz`: remove the parking/forwarding record for
-   the apex, add `A` records to `185.199.108.153`, `185.199.109.153`,
-   `185.199.110.153`, `185.199.111.153` (optionally `www` `CNAME`
-   `kensukename2.github.io`). Leave the `alerts` record unchanged.
+```bash
+ssh knaitocap
+systemctl list-timers ews-news.timer          # next scheduled run
+sudo systemctl start ews-news.service         # run now (takes ~15-25 min)
+journalctl -u ews-news.service -n 100         # log of the latest runs
+sudo -u ewsnews -H /opt/ews-news-monitor/.venv/bin/python -m ews_news report   # spending
+```
+
+### Server setup (already done; for reference or a new server)
+
+```bash
+apt-get install -y python3-venv
+useradd --system --home-dir /var/lib/ewsnews --create-home --shell /usr/sbin/nologin ewsnews
+# deploy key: ssh-keygen as ewsnews, add the public key to the repository's
+# Settings -> Deploy keys with write access, Host alias "github-ewsnews" in
+# /var/lib/ewsnews/.ssh/config
+sudo -u ewsnews -H git clone git@github-ewsnews:kensukename2/ews-news-monitor.git /opt/ews-news-monitor
+cd /opt/ews-news-monitor
+sudo -u ewsnews -H git worktree add state -B data origin/data
+sudo -u ewsnews -H python3 -m venv .venv && sudo -u ewsnews -H .venv/bin/pip install -r requirements.txt
+# .env with ANTHROPIC_API_KEY, owner ewsnews, mode 600
+install -m 644 deploy/ews-news.service deploy/ews-news.timer /etc/systemd/system/
+systemctl daemon-reload && systemctl enable --now ews-news.timer
+```
+
+DNS at Porkbun for `knaito.xyz`: four `A` records to `185.199.108.153`,
+`185.199.109.153`, `185.199.110.153`, `185.199.111.153`, `www` `CNAME`
+`kensukename2.github.io`, and the `_github-pages-challenge-kensukename2`
+TXT record (domain verification). The `alerts` record points to the server.
 
 ## Data and privacy
 
 Only metadata (title, source, date, URL), a short snippet/description and
-generated summaries are stored. Secrets are read from `.env` locally and
-from GitHub Actions secrets in CI; `.env` is never committed.
+generated summaries are stored. Secrets are read from `.env` (on your computer and on the
+server, readable only by the `ewsnews` user); `.env` is never committed.
 
 ## License
 

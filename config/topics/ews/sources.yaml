@@ -388,7 +388,8 @@ es:
     language: es
     prefilter: strict
     agency_type: NMHS
-    enabled: true
+    enabled: false
+    notes: "Connection times out from the Hetzner server (works from other networks), checked 2026-10-17."
 
   - id: inamhi
     name: INAMHI Ecuador
