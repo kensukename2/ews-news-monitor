@@ -7,7 +7,7 @@
   <meta name="description" content="Daily news on how early warning services were provided during hazardous events, grouped by WMO Region.">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
   <link rel="stylesheet" href="../site.css">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../assets/news.css">
 </head>
 <body>
 <div class="page-wrapper">
@@ -24,6 +24,7 @@
           <div class="navbar-start">
             <a class="navbar-item" href="/">Home</a>
             <a class="navbar-item is-active" href="/ews_news/">EWS News</a>
+            <a class="navbar-item" href="/ai_news/">AI News</a>
           </div>
         </div>
       </nav>
@@ -38,35 +39,8 @@
       <p class="updated">Last updated: <strong id="last-updated">…</strong> <span class="has-text-grey">(Europe/Zurich)</span></p>
       <div id="status-banner"></div>
 
-      <div class="tabs is-boxed region-tabs" id="region-tabs"><ul></ul></div>
-
-      <form class="box filters" id="filters" autocomplete="off">
-        <div class="columns is-multiline is-variable is-2">
-          <div class="column is-12-mobile is-6-tablet is-4-desktop">
-            <label class="label is-small" for="f-search">Search</label>
-            <input class="input is-small" type="search" id="f-search" placeholder="e.g. typhoon, SENAMHI, 避難, evacuación">
-          </div>
-          <div class="column is-6-mobile is-3-tablet is-2-desktop">
-            <label class="label is-small" for="f-from">From</label>
-            <input class="input is-small" type="date" id="f-from">
-          </div>
-          <div class="column is-6-mobile is-3-tablet is-2-desktop">
-            <label class="label is-small" for="f-to">To</label>
-            <input class="input is-small" type="date" id="f-to">
-          </div>
-          <div class="column is-6-mobile is-4-tablet is-2-desktop"><label class="label is-small" for="f-hazard">Hazard</label><div class="select is-small is-fullwidth"><select id="f-hazard"></select></div></div>
-          <div class="column is-6-mobile is-4-tablet is-2-desktop"><label class="label is-small" for="f-country">Country</label><div class="select is-small is-fullwidth"><select id="f-country"></select></div></div>
-          <div class="column is-6-mobile is-4-tablet is-3-desktop"><label class="label is-small" for="f-agency">Agency type</label><div class="select is-small is-fullwidth"><select id="f-agency"></select></div></div>
-          <div class="column is-6-mobile is-4-tablet is-3-desktop"><label class="label is-small" for="f-pillar">EW4All pillar</label><div class="select is-small is-fullwidth"><select id="f-pillar"></select></div></div>
-          <div class="column is-6-mobile is-4-tablet is-2-desktop"><label class="label is-small" for="f-outcome">Outcome</label><div class="select is-small is-fullwidth"><select id="f-outcome"></select></div></div>
-          <div class="column is-6-mobile is-4-tablet is-2-desktop"><label class="label is-small" for="f-lang">Language</label><div class="select is-small is-fullwidth"><select id="f-lang"></select></div></div>
-          <div class="column is-12-mobile is-12-tablet is-2-desktop filter-actions">
-            <label class="checkbox is-size-7"><input type="checkbox" id="f-review" checked> Include items flagged for review</label>
-            <button type="reset" class="button is-small is-light" id="f-reset">Reset filters</button>
-          </div>
-        </div>
-      </form>
-
+      <div class="tabs is-boxed region-tabs" id="tabs"><ul></ul></div>
+      <form class="box filters" id="filters" autocomplete="off"></form>
       <p class="result-count has-text-grey is-size-7" id="result-count"></p>
 
       <section id="today-section" hidden>
@@ -91,7 +65,56 @@
     </div>
   </footer>
 </div>
+<script>
+  // Page configuration for the shared script ../assets/news.js (see docs/data-schema.md).
+  const REGIONS = {
+    I: "RA I Africa", II: "RA II Asia", III: "RA III South America",
+    IV: "RA IV North & Central America, Caribbean", V: "RA V South-West Pacific", VI: "RA VI Europe",
+  };
+  const PILLARS = {
+    1: "1 Risk knowledge", 2: "2 Detection, monitoring & forecasting",
+    3: "3 Dissemination & communication", 4: "4 Preparedness & response",
+  };
+  const OUTCOMES = { positive: "Positive", mixed: "Mixed", negative: "Negative", not_reported: "Not reported" };
+  const AGENCY = {
+    NMHS: "NMHS", RSMC: "RSMC", other_national_agency: "Other national agency",
+    international: "International", NGO: "NGO", media: "Media", other: "Other",
+  };
+  window.NEWS_PAGE = {
+    searchHint: "e.g. typhoon, SENAMHI, 避難, evacuación",
+    tabs: {
+      field: "wmo_regions", all: "All regions", titles: REGIONS,
+      labels: { I: "RA I Africa", II: "RA II Asia", III: "RA III South America",
+                IV: "RA IV N. & C. America", V: "RA V SW Pacific", VI: "RA VI Europe" },
+    },
+    filters: [
+      { id: "hazard", label: "Hazard", facet: "hazards", field: "hazards", all: "All hazards" },
+      { id: "agency", label: "Agency type", facet: "agency_types", field: "agency_types", all: "All agency types", labels: AGENCY },
+      { id: "pillar", label: "EW4All pillar", facet: "pillars", field: "pillars", all: "All pillars", labels: PILLARS },
+      { id: "outcome", label: "Outcome", facet: "outcomes", field: "outcome", all: "All outcomes", labels: OUTCOMES },
+    ],
+    card: {
+      heading: (s) => (s.event_name ? s.event_name + ": " + s.title : s.title),
+      tags: (s) => [].concat(
+        s.hazards.map((h) => ["is-info is-light", NEWS.label(h)]),
+        s.wmo_regions.map((r) => ["is-light", "RA " + r, REGIONS[r]]),
+        [["outcome-" + s.outcome, "Outcome: " + (OUTCOMES[s.outcome] || s.outcome)]]),
+      rows: (s) => {
+        const e = NEWS.esc, rows = [];
+        if (s.agencies.length) rows.push(["Agencies", s.agencies.map((a) => e(a.name) + ' <span class="has-text-grey">(' + e(AGENCY[a.type] || a.type) + ")</span>").join("; ")]);
+        if (s.pillars.length) rows.push(["EW4All pillars", e(s.pillars.map((p) => PILLARS[p]).join("; "))]);
+        if (s.channels.length) rows.push(["Channels", e(s.channels.map(NEWS.label).join(", "))]);
+        if (s.lead_time) rows.push(["Lead time", e(s.lead_time)]);
+        if (s.actions.length) rows.push(["Actions", e(s.actions.join("; "))]);
+        const imp = Object.entries(s.impacts || {}).map(([k, v]) => NEWS.label(k) + ": " + (typeof v === "number" ? v.toLocaleString("en") : v));
+        if (imp.length) rows.push(["Impacts", e(imp.join("; "))]);
+        if (s.outcome_justification) rows.push(["Outcome", e(s.outcome_justification)]);
+        return rows;
+      },
+    },
+  };
+</script>
 <script src="../site.js"></script>
-<script src="app.js"></script>
+<script src="../assets/news.js"></script>
 </body>
 </html>

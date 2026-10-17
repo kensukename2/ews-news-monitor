@@ -3,6 +3,7 @@
 .filters .label { margin-bottom: 0.2rem; }
 .filter-actions { display: flex; flex-direction: column; gap: 0.4rem; justify-content: flex-end; }
 .region-tabs { margin-bottom: 1rem !important; }
+.region-tabs ul { flex-wrap: nowrap; }
 .region-tabs a { font-size: 0.9rem; }
 .region-tabs .count { margin-left: 0.35rem; font-size: 0.75rem; color: #7a7a7a; }
 .section-heading { margin: 1.25rem 0 0.75rem !important; }

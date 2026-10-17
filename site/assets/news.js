@@ -1,28 +1,21 @@
-// EWS News page. Reads data/manifest.json and data/stories-YYYY-MM.json
-// (format documented in docs/data-schema.md) and renders them with filters.
+// Shared news page script (EWS News, AI News).
+// Reads data/manifest.json and data/stories-YYYY-MM.json (format: docs/data-schema.md)
+// and renders them using the page's configuration in window.NEWS_PAGE:
+//
+//   tabs:    {field, all, labels: {value: "Tab name"}, titles: {value: "tooltip"}}
+//   filters: [{id, label, field, all, labels?}]   select menus built from manifest facets
+//            (facet = manifest facet name; field = story field, list or single value)
+//   card:    {heading(s), tags(s) -> [[cls, text, title?]], rows(s) -> [[label, html]]}
 (function () {
   "use strict";
 
+  const PAGE = window.NEWS_PAGE;
   const DATA = "data/";
   const PAGE_SIZE = 20;
-  const REGIONS = {
-    I: "RA I Africa", II: "RA II Asia", III: "RA III South America",
-    IV: "RA IV North & Central America, Caribbean", V: "RA V South-West Pacific", VI: "RA VI Europe",
-  };
-  const REGION_SHORT = { I: "Africa", II: "Asia", III: "South America", IV: "N. & C. America", V: "SW Pacific", VI: "Europe" };
-  const PILLARS = {
-    1: "1 Risk knowledge", 2: "2 Detection, monitoring & forecasting",
-    3: "3 Dissemination & communication", 4: "4 Preparedness & response",
-  };
-  const OUTCOMES = { positive: "Positive", mixed: "Mixed", negative: "Negative", not_reported: "Not reported" };
   const LANGS = { en: "English", ja: "日本語", es: "Español" };
-  const AGENCY = {
-    NMHS: "NMHS", RSMC: "RSMC", other_national_agency: "Other national agency",
-    international: "International", NGO: "NGO", media: "Media", other: "Other",
-  };
 
   const $ = (id) => document.getElementById(id);
-  const state = { manifest: null, stories: [], region: "all", shown: PAGE_SIZE };
+  const state = { manifest: null, stories: [], tab: "all", shown: PAGE_SIZE };
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => (
@@ -32,14 +25,18 @@
   function label(s) { return String(s).replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase()); }
   function fmtLocal(iso) {
     if (!iso) return "–";
-    const d = new Date(iso);
-    return d.toLocaleString("en-GB", { timeZone: "Europe/Zurich", year: "numeric", month: "short",
-      day: "numeric", hour: "2-digit", minute: "2-digit" });
+    return new Date(iso).toLocaleString("en-GB", { timeZone: "Europe/Zurich", year: "numeric",
+      month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
   }
   function fmtDate(iso) {
     return iso ? new Date(iso.length === 10 ? iso + "T12:00:00Z" : iso)
       .toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "numeric" }) : "";
   }
+  function asList(v) { return Array.isArray(v) ? v : (v == null ? [] : [v]); }
+  function nameOf(map, v) { return (map && map[v]) || label(v); }
+
+  // Helpers available to the page configuration.
+  window.NEWS = { esc, label, nameOf, fmtDate };
 
   async function getJSON(name) {
     const r = await fetch(DATA + name, { cache: "no-cache" });
@@ -77,19 +74,41 @@
   }
 
   // ----------------------------------------------------------------- filters
-  function fillSelect(id, values, toLabel, allLabel) {
-    $(id).innerHTML = '<option value="">' + esc(allLabel) + "</option>" +
-      values.map((v) => '<option value="' + esc(v) + '">' + esc(toLabel(v)) + "</option>").join("");
-  }
+  function buildFilters(facets) {
+    const col = (cls, inner) => '<div class="column ' + cls + '">' + inner + "</div>";
+    const select = (f) => col("is-6-mobile is-4-tablet is-2-desktop",
+      '<label class="label is-small" for="f-' + f.id + '">' + esc(f.label) + "</label>" +
+      '<div class="select is-small is-fullwidth"><select id="f-' + f.id + '"></select></div>');
+    $("filters").innerHTML = '<div class="columns is-multiline is-variable is-2">' +
+      col("is-12-mobile is-6-tablet is-4-desktop",
+        '<label class="label is-small" for="f-search">Search</label>' +
+        '<input class="input is-small" type="search" id="f-search" placeholder="' + esc(PAGE.searchHint || "Search") + '">') +
+      col("is-6-mobile is-3-tablet is-2-desktop",
+        '<label class="label is-small" for="f-from">From</label><input class="input is-small" type="date" id="f-from">') +
+      col("is-6-mobile is-3-tablet is-2-desktop",
+        '<label class="label is-small" for="f-to">To</label><input class="input is-small" type="date" id="f-to">') +
+      PAGE.filters.map(select).join("") +
+      col("is-6-mobile is-4-tablet is-2-desktop",
+        '<label class="label is-small" for="f-country">Country</label>' +
+        '<div class="select is-small is-fullwidth"><select id="f-country"></select></div>') +
+      col("is-6-mobile is-4-tablet is-2-desktop",
+        '<label class="label is-small" for="f-lang">Language</label>' +
+        '<div class="select is-small is-fullwidth"><select id="f-lang"></select></div>') +
+      col("is-12-mobile is-12-tablet is-2-desktop filter-actions",
+        '<label class="checkbox is-size-7"><input type="checkbox" id="f-review" checked> Include items flagged for review</label>' +
+        '<button type="reset" class="button is-small is-light">Reset filters</button>') +
+      "</div>";
 
-  function setupFilters(f) {
-    fillSelect("f-hazard", f.hazards || [], label, "All hazards");
-    $("f-country").innerHTML = '<option value="">All countries</option>' + (f.countries || [])
+    const fill = (id, values, toLabel, all) => {
+      $(id).innerHTML = '<option value="">' + esc(all) + "</option>" + values.map((v) =>
+        '<option value="' + esc(v) + '">' + esc(toLabel(v)) + "</option>").join("");
+    };
+    PAGE.filters.forEach((f) => fill("f-" + f.id, (facets[f.facet] || []).map(String),
+      (v) => nameOf(f.labels, v), f.all));
+    $("f-country").innerHTML = '<option value="">All countries</option>' + (facets.countries || [])
       .map((c) => '<option value="' + esc(c.code) + '">' + esc(c.name) + "</option>").join("");
-    fillSelect("f-agency", f.agency_types || [], (v) => AGENCY[v] || v, "All agency types");
-    fillSelect("f-pillar", (f.pillars || []).map(String), (v) => PILLARS[v] || v, "All pillars");
-    fillSelect("f-outcome", f.outcomes || [], (v) => OUTCOMES[v] || v, "All outcomes");
-    fillSelect("f-lang", f.languages || [], (v) => LANGS[v] || v, "All languages");
+    fill("f-lang", facets.languages || [], (v) => LANGS[v] || v, "All languages");
+
     const form = $("filters");
     form.addEventListener("input", () => { state.shown = PAGE_SIZE; render(); });
     form.addEventListener("submit", (e) => e.preventDefault());
@@ -97,36 +116,36 @@
   }
 
   function currentFilters() {
-    return {
-      q: $("f-search").value.trim().toLowerCase(),
-      from: $("f-from").value, to: $("f-to").value,
-      hazard: $("f-hazard").value, country: $("f-country").value, agency: $("f-agency").value,
-      pillar: $("f-pillar").value, outcome: $("f-outcome").value, lang: $("f-lang").value,
-      review: $("f-review").checked,
+    const f = {
+      q: $("f-search").value.trim().toLowerCase(), from: $("f-from").value, to: $("f-to").value,
+      country: $("f-country").value, lang: $("f-lang").value, review: $("f-review").checked, sel: {},
     };
+    PAGE.filters.forEach((x) => { f.sel[x.field] = $("f-" + x.id).value; });
+    return f;
   }
 
   function searchText(s) {
     if (!s._text) {
-      s._text = [s.event_name, s.title, s.summary_en, s.event_location,
+      s._text = [s.event_name, s.title, s.summary_en, s.event_location, s.value_added,
         Object.values(s.summaries_original || {}).join(" "),
-        s.countries.map((c) => c.name).join(" "), s.agencies.map((a) => a.name).join(" "),
+        s.countries.map((c) => c.name).join(" "),
+        (s.agencies || s.institutions || []).map((a) => a.name + " " + (a.short_name || "")).join(" "),
+        (s.system_names || []).join(" "),
         s.sources.map((x) => x.title + " " + x.source_name).join(" ")].join(" ").toLowerCase();
     }
     return s._text;
   }
 
-  function matches(s, f, ignoreRegion) {
-    if (!ignoreRegion && state.region !== "all" && !s.wmo_regions.includes(state.region)) return false;
+  function matches(s, f, ignoreTab) {
+    if (!ignoreTab && state.tab !== "all" && !asList(s[PAGE.tabs.field]).includes(state.tab)) return false;
     if (!f.review && s.review) return false;
     const d = s.event_date || s.first_seen.slice(0, 10);
     if (f.from && d < f.from) return false;
     if (f.to && d > f.to) return false;
-    if (f.hazard && !s.hazards.includes(f.hazard)) return false;
+    for (const [field, value] of Object.entries(f.sel)) {
+      if (value && !asList(s[field]).map(String).includes(value)) return false;
+    }
     if (f.country && !s.countries.some((c) => c.code === f.country)) return false;
-    if (f.agency && !s.agency_types.includes(f.agency)) return false;
-    if (f.pillar && !s.pillars.includes(Number(f.pillar))) return false;
-    if (f.outcome && s.outcome !== f.outcome) return false;
     if (f.lang && !s.languages.includes(f.lang)) return false;
     if (f.q && !f.q.split(/\s+/).every((w) => searchText(s).includes(w))) return false;
     return true;
@@ -135,34 +154,23 @@
   // ------------------------------------------------------------------ render
   function renderTabs(f) {
     const base = state.stories.filter((s) => matches(s, f, true));
-    const count = (r) => (r === "all" ? base.length : base.filter((s) => s.wmo_regions.includes(r)).length);
-    const tabs = [["all", "All regions"]].concat(Object.keys(REGIONS).map((r) => [r, "RA " + r + " " + REGION_SHORT[r]]));
-    $("region-tabs").querySelector("ul").innerHTML = tabs.map(([r, name]) =>
-      '<li class="' + (state.region === r ? "is-active" : "") + '"><a href="#' + r + '" data-region="' + r +
-      '" title="' + esc(REGIONS[r] || name) + '">' + esc(name) + '<span class="count">' + count(r) + "</span></a></li>").join("");
+    const t = PAGE.tabs;
+    const count = (v) => (v === "all" ? base.length : base.filter((s) => asList(s[t.field]).includes(v)).length);
+    const tabs = [["all", t.all]].concat(Object.entries(t.labels));
+    $("tabs").querySelector("ul").innerHTML = tabs.map(([v, name]) =>
+      '<li class="' + (state.tab === v ? "is-active" : "") + '"><a href="#' + esc(v) + '" data-tab="' + esc(v) +
+      '" title="' + esc((t.titles && t.titles[v]) || name) + '">' + esc(name) + '<span class="count">' + count(v) +
+      "</span></a></li>").join("");
   }
 
   function storyCard(s) {
-    const outcome = '<span class="tag outcome-' + esc(s.outcome) + '">Outcome: ' + esc(OUTCOMES[s.outcome] || s.outcome) + "</span>";
-    const review = s.review ? '<span class="tag review" title="Low classification confidence">Needs review</span>' : "";
-    const hazards = s.hazards.map((h) => '<span class="tag is-info is-light">' + esc(label(h)) + "</span>").join("");
-    const regions = s.wmo_regions.map((r) => '<span class="tag is-light">RA ' + esc(r) + "</span>").join("");
+    const tags = PAGE.card.tags(s).map(([cls, text, title]) =>
+      '<span class="tag ' + esc(cls) + '"' + (title ? ' title="' + esc(title) + '"' : "") + ">" + esc(text) + "</span>").join("") +
+      (s.review ? '<span class="tag review" title="Low classification confidence">Needs review</span>' : "");
     const countries = s.countries.map((c) => c.name).join(", ");
-    const heading = s.event_name ? s.event_name + ": " + s.title : s.title;
-
     const originals = Object.entries(s.summaries_original || {}).map(([lang, text]) =>
       '<div class="original-summary" lang="' + esc(lang) + '"><span class="lang-badge">' + esc(lang) + "</span>" + esc(text) + "</div>").join("");
-
-    const rows = [];
-    if (s.agencies.length) rows.push(["Agencies", s.agencies.map((a) => esc(a.name) + ' <span class="has-text-grey">(' + esc(AGENCY[a.type] || a.type) + ")</span>").join("; ")]);
-    if (s.pillars.length) rows.push(["EW4All pillars", esc(s.pillars.map((p) => PILLARS[p]).join("; "))]);
-    if (s.channels.length) rows.push(["Channels", esc(s.channels.map(label).join(", "))]);
-    if (s.lead_time) rows.push(["Lead time", esc(s.lead_time)]);
-    if (s.actions.length) rows.push(["Actions", esc(s.actions.join("; "))]);
-    const imp = Object.entries(s.impacts || {}).map(([k, v]) => label(k) + ": " + (typeof v === "number" ? v.toLocaleString("en") : v));
-    if (imp.length) rows.push(["Impacts", esc(imp.join("; "))]);
-    if (s.outcome_justification) rows.push(["Outcome", esc(s.outcome_justification)]);
-
+    const rows = PAGE.card.rows(s);
     const sources = s.sources.map((x) =>
       '<li><span class="lang-badge">' + esc(x.language) + '</span><a href="' + esc(safeUrl(x.url)) +
       '" target="_blank" rel="noopener noreferrer">' + esc(x.title) + "</a> " +
@@ -171,11 +179,11 @@
       "</li>").join("");
 
     return '<article class="box story' + (s.is_new ? " is-new" : "") + '">' +
-      '<div class="story-head"><h3 class="story-title">' + esc(heading) + "</h3>" +
+      '<div class="story-head"><h3 class="story-title">' + esc(PAGE.card.heading(s)) + "</h3>" +
       (s.is_new ? '<span class="tag is-link">New today</span>' : "") + "</div>" +
       '<p class="story-meta">' + esc(fmtDate(s.event_date)) + (countries ? " · " + esc(countries) : "") +
       (s.event_location ? " · " + esc(s.event_location) : "") + " · " + s.sources.length + " source" + (s.sources.length > 1 ? "s" : "") + "</p>" +
-      '<div class="tags">' + hazards + regions + outcome + review + "</div>" +
+      '<div class="tags">' + tags + "</div>" +
       '<p class="story-summary">' + esc(s.summary_en) + "</p>" +
       (originals ? "<details><summary>Original-language summary</summary>" + originals + "</details>" : "") +
       "<details><summary>Details and sources (" + s.sources.length + ")</summary>" +
@@ -196,7 +204,8 @@
     $("earlier-list").innerHTML = earlier.slice(0, state.shown).map(storyCard).join("") ||
       (today.length ? "" : '<p class="has-text-grey">No stories match these filters.</p>');
     $("load-more").hidden = earlier.length <= state.shown;
-    $("result-count").textContent = list.length + " stories" + (today.length ? " · " + today.length + " new today" : "");
+    $("result-count").textContent = list.length + (list.length === 1 ? " story" : " stories") +
+      (today.length ? " · " + today.length + " new today" : "");
   }
 
   // -------------------------------------------------------------------- init
@@ -210,17 +219,17 @@
     }
     state.manifest = m;
     showStatus(m);
-    setupFilters(m.facets || {});
-    const hash = location.hash.replace("#", "");
-    if (REGIONS[hash]) state.region = hash;
+    buildFilters(m.facets || {});
+    const hash = decodeURIComponent(location.hash.replace("#", ""));
+    if (PAGE.tabs.labels[hash]) state.tab = hash;
 
-    $("region-tabs").addEventListener("click", (e) => {
-      const a = e.target.closest("a[data-region]");
+    $("tabs").addEventListener("click", (e) => {
+      const a = e.target.closest("a[data-tab]");
       if (!a) return;
       e.preventDefault();
-      state.region = a.dataset.region;
+      state.tab = a.dataset.tab;
       state.shown = PAGE_SIZE;
-      history.replaceState(null, "", state.region === "all" ? location.pathname : "#" + state.region);
+      history.replaceState(null, "", state.tab === "all" ? location.pathname : "#" + state.tab);
       render();
     });
     $("load-more").addEventListener("click", () => { state.shown += PAGE_SIZE; render(); });
@@ -241,6 +250,7 @@
     }
     $("loading").hidden = true;
     if (!months.length) {
+      render();
       $("earlier-list").innerHTML = '<p class="has-text-grey">No stories have been collected yet.</p>';
     }
   }
