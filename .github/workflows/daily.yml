@@ -1,17 +1,23 @@
 # Daily pipeline + deployment of knaito.xyz (GitHub Pages).
 #
-# * Scheduled: triggered at 03:00 and 04:00 UTC; `daily-gate` lets exactly one
-#   run through per day at or after 05:00 Europe/Zurich (summer and winter time).
+# * Scheduled: triggered several times between 03:07 and 05:37 UTC (GitHub often
+#   delays schedules, especially on the full hour); `daily-gate` lets exactly
+#   one run through per day at or after 05:00 Europe/Zurich (summer and winter).
+# * Topics: every folder in config/topics/ (EWS News, AI News) is run in turn.
 # * Manual: Actions tab -> "Daily EWS news" -> Run workflow.
 # * Push to main: redeploys the site with the existing data (no new collection).
 #
-# State (SQLite text dump, run logs, published JSON) lives on the `data` branch.
+# State (SQLite text dumps, run logs, published JSON) lives on the `data` branch.
 name: Daily EWS news
 
 on:
   schedule:
-    - cron: "0 3 * * *"
-    - cron: "0 4 * * *"
+    - cron: "7 3 * * *"
+    - cron: "37 3 * * *"
+    - cron: "7 4 * * *"
+    - cron: "37 4 * * *"
+    - cron: "7 5 * * *"
+    - cron: "37 5 * * *"
   workflow_dispatch:
     inputs:
       run_pipeline:
@@ -55,8 +61,8 @@ jobs:
             git worktree add state data
           else
             git worktree add --orphan -b data state
-            printf 'ews.sqlite\n' > state/.gitignore
           fi
+          grep -qx '\*.sqlite' state/.gitignore 2>/dev/null || printf '*.sqlite\n' >> state/.gitignore
 
       - name: Decide whether to run the pipeline
         id: gate
@@ -83,8 +89,13 @@ jobs:
       - name: Save state to the data branch
         if: steps.gate.outputs.run == 'true'
         run: |
-          mkdir -p state/published
-          cp -r site/ews_news/data/. state/published/ 2>/dev/null || true
+          rm -f state/published/*.json   # files from the old single-topic layout
+          for page in ews_news ai_news; do
+            if [ -d "site/$page/data" ]; then
+              mkdir -p "state/published/$page"
+              cp -r "site/$page/data/." "state/published/$page/"
+            fi
+          done
           cd state
           git add -A
           if ! git diff --cached --quiet; then
@@ -95,7 +106,7 @@ jobs:
       - name: Rebuild page data from saved state (no new collection)
         if: steps.gate.outputs.run != 'true'
         run: |
-          if [ -f state/ews.sql ]; then python -m ews_news publish; fi
+          python -m ews_news publish   # each topic restores its database dump if present
 
       - name: Skip deployment on scheduled runs that did not run
         id: should_deploy

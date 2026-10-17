@@ -4,8 +4,8 @@
 #   id           unique short identifier (used in logs and the database)
 #   name         display name
 #   type         rss          RSS/Atom feed (preferred)
-#                gdelt        GDELT DOC API, queries from config/languages/<lang>.yaml
-#                claude_search  Claude web search, queries from config/languages/<lang>.yaml
+#                gdelt        GDELT DOC API, queries from languages/<lang>.yaml in this folder
+#                claude_search  Claude web search, queries from languages/<lang>.yaml in this folder
 #                html_links   news list page of a site without a feed (see link_pattern)
 #                jma_press    気象庁 press release list
 #   url          feed or page URL

@@ -1,8 +1,16 @@
 # Data schema
 
-The web page (`site/ews_news/`) only reads static JSON files from
-`site/ews_news/data/`. You can redesign the page freely as long as it reads
-these files. All text is UTF-8; all timestamps are ISO-8601 in UTC
+Each news page only reads static JSON files from its own `data/` folder:
+
+| Page | Topic | Files |
+|---|---|---|
+| `site/ews_news/` (knaito.xyz/ews_news) | `ews` | `site/ews_news/data/` |
+| `site/ai_news/` (knaito.xyz/ai_news) | `ai` | `site/ai_news/data/` |
+
+Both pages use the shared script `site/assets/news.js`; the tabs, filters and
+card contents are set in a small `window.NEWS_PAGE` block in each page's
+`index.html`. You can redesign the pages freely as long as they read these
+files. All text is UTF-8; all timestamps are ISO-8601 in UTC
 (`2026-10-16T03:05:00Z`) unless the field name ends in `_local`.
 
 ## `manifest.json`
@@ -12,6 +20,7 @@ Read first. Small; tells the page what exists and whether the last update worked
 | Field | Type | Meaning |
 |---|---|---|
 | `schema_version` | int | Currently `1`. Increased if fields change incompatibly. |
+| `topic` | string | `ews` or `ai`. |
 | `generated_at` | string | When these files were written (UTC). |
 | `generated_at_local` | string | Same, in Europe/Zurich, e.g. `2026-10-16T05:12+02:00`. |
 | `timezone` | string | `Europe/Zurich`. |
@@ -22,7 +31,7 @@ Read first. Small; tells the page what exists and whether the last update worked
 | `total_stories` | int | Number of stories in all monthly files. |
 | `new_today` | int | Stories first seen today (Zurich date). |
 | `months` | list | `{"month": "2026-10", "file": "stories-2026-10.json", "count": 33}`, newest first. |
-| `facets` | object | Values present in the data, for filter menus: `hazards`, `wmo_regions`, `agency_types`, `pillars`, `outcomes`, `languages` (lists of strings/ints) and `countries` (list of `{code, name}`). |
+| `facets` | object | Values present in the data, for filter menus, plus `countries` (list of `{code, name}`). EWS: `hazards`, `wmo_regions`, `agency_types`, `pillars`, `outcomes`, `languages`. AI: `areas`, `news_types`, `institution_types`, `techniques`, `value_types`, `wmo_regions`, `languages`. |
 
 `last_run`:
 
@@ -37,6 +46,13 @@ Read first. Small; tells the page what exists and whether the last update worked
 | `stats.fatal_error` | Message if the whole run crashed. |
 
 ## `stories-YYYY-MM.json`
+
+Fields common to both topics: `id`, `title`, `countries`, `wmo_regions`,
+`summary_en`, `summaries_original`, `languages`, `confidence`, `review`,
+`sources`, `event_date`, `first_seen`, `first_seen_local`, `last_updated`,
+`is_new` (see the EWS table below for their meaning).
+
+### EWS News stories
 
 ```json
 {"schema_version": 1, "month": "2026-10", "stories": [ ... ]}
@@ -80,11 +96,32 @@ Hazard values: `tropical_cyclone`, `flood`, `flash_flood`, `storm_surge`,
 `tsunami`, `earthquake`, `volcanic`, `wildfire`, `cold_wave`, `snow_ice`,
 `sand_dust_storm`, `glacial_lake_outburst`, `multi_hazard`, `other`.
 
-## Database (SQLite, `state/ews.sqlite`)
+### AI News stories
+
+| Field | Type | Meaning |
+|---|---|---|
+| `event_name` | string or null | First AI system name, if any. |
+| `system_names` | list | AI models/systems mentioned, e.g. `AIFS`, `GraphCast`. |
+| `primary_area` | string | Main area of operation (see list below). |
+| `areas` | list | All areas of operation where AI is used. Used for the page tabs. |
+| `institutions` | list | `{"name", "short_name", "type", "country"}`; `type` is one of `NMHS`, `WMO_centre` (ECMWF, RSMCs, RCCs, EUMETSAT…), `WMO`, `national_ews_agency`, `other_national_agency`, `international`, `research`, `private_sector`, `NGO`, `other`. |
+| `institution_types` | list | Distinct `type` values above. |
+| `techniques` | list | `ml_dl`, `ai_weather_model`, `llm_genai`, `computer_vision`, `nlp_translation`, `other`. |
+| `news_type` | string | Main type: `model_release`, `operational_implementation`, `pilot_research`, `partnership_funding`, `policy_guidance`, `training_capacity`, `event_conference`, `other`. |
+| `news_types` | list | All types among its articles. |
+| `value_added` | string or null | What the AI improves, as stated. |
+| `value_types` | list | `speed`, `accuracy`, `lead_time`, `resolution`, `cost`, `coverage`, `accessibility`, `efficiency`, `other`. |
+
+Areas of operation: `observations`, `data_processing`, `forecasting`,
+`guidance`, `hydrology`, `warnings`, `communication`, `climate_services`,
+`operations`, `other`.
+
+## Database (SQLite, `state/ews.sqlite` and `state/ai.sqlite`)
 
 Defined in `ews_news/db.py`. Tables: `items` (every collected article with
 its status), `classifications` (Claude's structured output per item, JSON in
 `data_json`), `stories`, `runs`, `source_stats` (per run and source) and
-`api_usage` (every Claude call with tokens and cost). The daily job saves a
-text dump `ews.sql` on the `data` branch; it can be loaded into PostgreSQL
+`api_usage` (every Claude call with tokens and cost). Each topic has its own
+database (and therefore its own budget). The daily job saves text dumps
+`ews.sql` and `ai.sql` on the `data` branch; it can be loaded into PostgreSQL
 with minor edits.
