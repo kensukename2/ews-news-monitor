@@ -1,0 +1,340 @@
+{
+  "run_id": 6,
+  "started_at": "2026-10-19T03:00:19Z",
+  "status": "partial",
+  "sources": [
+    {
+      "source_id": "wmo_press",
+      "language": "en",
+      "fetched": 12,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "wmo_news",
+      "language": "en",
+      "fetched": 3,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "ecmwf",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "eumetsat",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "itu_ai4good",
+      "language": "en",
+      "fetched": 500,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "preventionweb",
+      "language": "en",
+      "fetched": 40,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "undrr",
+      "language": "en",
+      "fetched": 40,
+      "new_items": 1,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "reliefweb_ai",
+      "language": "en",
+      "fetched": 20,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "gdelt_en",
+      "language": "en",
+      "fetched": 0,
+      "new_items": 0,
+      "kept": 0,
+      "error": "HTTPError: 429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=%28%22artificial+intelligence%22+OR+%22machine+learning%22+OR+%22AI+model%22+OR+%22deep+learning%22%29+%28weather+OR+meteorological+OR+%22early+warning%22+OR+hydrological+OR+%22flood+forecasting"
+    },
+    {
+      "source_id": "websearch_en",
+      "language": "en",
+      "fetched": 6,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "noaa_news",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "metoffice_news",
+      "language": "en",
+      "fetched": 15,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "deepmind",
+      "language": "en",
+      "fetched": 100,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "google_research",
+      "language": "en",
+      "fetched": 100,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "nvidia_blog",
+      "language": "en",
+      "fetched": 18,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "msr_blog",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "eos",
+      "language": "en",
+      "fetched": 15,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "phys_earth",
+      "language": "en",
+      "fetched": 30,
+      "new_items": 1,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "theverge_ai",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 1,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "hpcwire",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "bbc_science",
+      "language": "en",
+      "fetched": 42,
+      "new_items": 9,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "jma_press",
+      "language": "ja",
+      "fetched": 40,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "nhk_news",
+      "language": "ja",
+      "fetched": 7,
+      "new_items": 7,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "nhk_society",
+      "language": "ja",
+      "fetched": 128,
+      "new_items": 11,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "nhk_science",
+      "language": "ja",
+      "fetched": 49,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "itmedia_ai",
+      "language": "ja",
+      "fetched": 20,
+      "new_items": 5,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "nikkei_xtech",
+      "language": "ja",
+      "fetched": 100,
+      "new_items": 46,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "impress_watch",
+      "language": "ja",
+      "fetched": 20,
+      "new_items": 4,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "gdelt_ja",
+      "language": "ja",
+      "fetched": 5,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "websearch_ja",
+      "language": "ja",
+      "fetched": 5,
+      "new_items": 2,
+      "kept": 2,
+      "error": null
+    },
+    {
+      "source_id": "gdelt_es",
+      "language": "es",
+      "fetched": 0,
+      "new_items": 0,
+      "kept": 0,
+      "error": "HTTPError: 429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=%28%22artificial+intelligence%22+OR+%22machine+learning%22+OR+AI%29+%28weather+OR+meteorological+OR+%22early+warning%22+OR+flood+OR+hurricane%29+sourcelang%3Aspanish&mode=ArtList&format=json&max"
+    },
+    {
+      "source_id": "websearch_es",
+      "language": "es",
+      "fetched": 7,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "aemet_news",
+      "language": "es",
+      "fetched": 10,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "senamhi_pe",
+      "language": "es",
+      "fetched": 25,
+      "new_items": 1,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "elpais_tec",
+      "language": "es",
+      "fetched": 21,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "xataka",
+      "language": "es",
+      "fetched": 26,
+      "new_items": 26,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "elpais_america",
+      "language": "es",
+      "fetched": 93,
+      "new_items": 62,
+      "kept": 0,
+      "error": null
+    }
+  ],
+  "classify": {
+    "classified": 3,
+    "relevant": 0,
+    "review": 0,
+    "errors": 0,
+    "copied": 0,
+    "left_pending": 0,
+    "budget_stopped": false,
+    "cost_usd": 0.0364
+  },
+  "stories_touched": 0,
+  "fatal_error": null,
+  "budget": {
+    "spent_month_usd": 0.1933,
+    "allowance_run_usd": 0.3725,
+    "monthly_usd": 5.0
+  },
+  "by_language": {
+    "en": {
+      "fetched": 1001,
+      "new_items": 12,
+      "kept": 0,
+      "errors": 1
+    },
+    "ja": {
+      "fetched": 374,
+      "new_items": 75,
+      "kept": 3,
+      "errors": 0
+    },
+    "es": {
+      "fetched": 182,
+      "new_items": 89,
+      "kept": 0,
+      "errors": 1
+    }
+  }
+}
