@@ -1,0 +1,17 @@
+/* Shared look for knaito.xyz pages (matches the CAP Composer site at alerts.knaito.xyz). */
+:root { --site-accent: #1b5fa6; }
+html, body { background: #fff; }
+.page-wrapper { min-height: 100vh; display: flex; flex-direction: column; }
+.page-wrapper > main { flex: 1; }
+.site-header { border-bottom: 1px solid rgba(195, 192, 192, 0.37); padding: 4px 0; }
+.site-header .navbar { min-height: 3rem; background: transparent; }
+.site-brand { font-weight: 700; letter-spacing: 0.5px; color: var(--site-accent) !important; }
+.navbar-item.is-active { color: var(--site-accent) !important; font-weight: 600; }
+.site-footer { border-top: 1px solid rgba(195, 192, 192, 0.37); padding: 1.25rem 1rem; color: #6b6b6b; }
+.site-footer a { color: var(--site-accent); }
+@media (prefers-color-scheme: dark) {
+  html, body { background: #14161a; }
+  .site-header, .site-footer { border-color: #2c2f36; }
+  .site-brand, .navbar-item.is-active, .site-footer a { color: #7fb3ec !important; }
+  .site-footer { color: #9aa0a6; }
+}
