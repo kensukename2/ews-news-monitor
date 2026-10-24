@@ -1,0 +1,404 @@
+{
+  "run_id": 16,
+  "started_at": "2026-10-24T03:04:54Z",
+  "status": "partial",
+  "sources": [
+    {
+      "source_id": "gdacs",
+      "language": "en",
+      "fetched": 310,
+      "new_items": 47,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "reliefweb_ew_en",
+      "language": "en",
+      "fetched": 20,
+      "new_items": 4,
+      "kept": 2,
+      "error": null
+    },
+    {
+      "source_id": "reliefweb_ew_es",
+      "language": "es",
+      "fetched": 20,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "preventionweb",
+      "language": "en",
+      "fetched": 40,
+      "new_items": 40,
+      "kept": 20,
+      "error": null
+    },
+    {
+      "source_id": "undrr",
+      "language": "en",
+      "fetched": 40,
+      "new_items": 4,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "wmo_press",
+      "language": "en",
+      "fetched": 12,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "wmo_news",
+      "language": "en",
+      "fetched": 4,
+      "new_items": 1,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "gdelt_en",
+      "language": "en",
+      "fetched": 0,
+      "new_items": 0,
+      "kept": 0,
+      "error": "HTTPError: 429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=%28%22early+warning%22+OR+%22warning+issued%22+OR+%22red+alert%22+OR+%22evacuated+ahead%22+OR+%22anticipatory+action%22+OR+%22cell+broadcast%22%29+%28flood+OR+cyclone+OR+typhoon+OR+hurricane+OR+"
+    },
+    {
+      "source_id": "websearch_en",
+      "language": "en",
+      "fetched": 2,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "noaa_news",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "metoffice_news",
+      "language": "en",
+      "fetched": 13,
+      "new_items": 1,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "pagasa_press",
+      "language": "en",
+      "fetched": 6,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "kmd_news",
+      "language": "en",
+      "fetched": 6,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "icpac_news",
+      "language": "en",
+      "fetched": 6,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "asmc",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "cimh_rcc",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "bbc_world",
+      "language": "en",
+      "fetched": 21,
+      "new_items": 18,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "bbc_science",
+      "language": "en",
+      "fetched": 40,
+      "new_items": 10,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "inquirer",
+      "language": "en",
+      "fetched": 40,
+      "new_items": 40,
+      "kept": 4,
+      "error": null
+    },
+    {
+      "source_id": "jma_press",
+      "language": "ja",
+      "fetched": 40,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "nhk_news",
+      "language": "ja",
+      "fetched": 7,
+      "new_items": 7,
+      "kept": 3,
+      "error": null
+    },
+    {
+      "source_id": "nhk_society",
+      "language": "ja",
+      "fetched": 126,
+      "new_items": 31,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "asahi_news",
+      "language": "ja",
+      "fetched": 40,
+      "new_items": 38,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "mainichi_news",
+      "language": "ja",
+      "fetched": 20,
+      "new_items": 20,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "gdelt_ja",
+      "language": "ja",
+      "fetched": 0,
+      "new_items": 0,
+      "kept": 0,
+      "error": "HTTPError: 429 Client Error: Too Many Requests for url: https://api.gdeltproject.org/api/v2/doc/doc?query=%28warning+OR+evacuation+OR+%22early+warning%22+OR+%22emergency+warning%22%29+%28typhoon+OR+%22heavy+rain%22+OR+flood+OR+landslide+OR+tsunami+OR+heatstroke%29+sourcelang%3Ajapanese&mode=ArtList&"
+    },
+    {
+      "source_id": "websearch_ja",
+      "language": "ja",
+      "fetched": 4,
+      "new_items": 2,
+      "kept": 2,
+      "error": null
+    },
+    {
+      "source_id": "bousai",
+      "language": "ja",
+      "fetched": 30,
+      "new_items": 1,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "fdma",
+      "language": "ja",
+      "fetched": 30,
+      "new_items": 1,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "mlit",
+      "language": "ja",
+      "fetched": 15,
+      "new_items": 1,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "jica_press",
+      "language": "ja",
+      "fetched": 20,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "gdelt_es",
+      "language": "es",
+      "fetched": 58,
+      "new_items": 9,
+      "kept": 4,
+      "error": null
+    },
+    {
+      "source_id": "websearch_es",
+      "language": "es",
+      "fetched": 8,
+      "new_items": 1,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "aemet_news",
+      "language": "es",
+      "fetched": 10,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "senamhi_pe",
+      "language": "es",
+      "fetched": 25,
+      "new_items": 6,
+      "kept": 2,
+      "error": null
+    },
+    {
+      "source_id": "inamhi",
+      "language": "es",
+      "fetched": 10,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "imn_cr",
+      "language": "es",
+      "fetched": 21,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "indeci",
+      "language": "es",
+      "fetched": 23,
+      "new_items": 4,
+      "kept": 3,
+      "error": null
+    },
+    {
+      "source_id": "cenepred",
+      "language": "es",
+      "fetched": 25,
+      "new_items": 3,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "ciifen",
+      "language": "es",
+      "fetched": 3,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "elpais_america",
+      "language": "es",
+      "fetched": 137,
+      "new_items": 95,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "elpais_portada",
+      "language": "es",
+      "fetched": 160,
+      "new_items": 65,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "clarin",
+      "language": "es",
+      "fetched": 10,
+      "new_items": 10,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "larepublica_pe",
+      "language": "es",
+      "fetched": 63,
+      "new_items": 26,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "eltiempo_co",
+      "language": "es",
+      "fetched": 10,
+      "new_items": 10,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "biobio_cl",
+      "language": "es",
+      "fetched": 20,
+      "new_items": 20,
+      "kept": 0,
+      "error": null
+    }
+  ],
+  "classify": {
+    "classified": 46,
+    "relevant": 29,
+    "review": 0,
+    "errors": 0,
+    "copied": 0,
+    "left_pending": 0,
+    "budget_stopped": false,
+    "cost_usd": 0.0499
+  },
+  "stories_touched": 20,
+  "fatal_error": null,
+  "budget": {
+    "spent_month_usd": 0.7134,
+    "allowance_run_usd": 0.5423,
+    "monthly_usd": 5.0
+  },
+  "by_language": {
+    "en": {
+      "fetched": 590,
+      "new_items": 165,
+      "kept": 28,
+      "errors": 1
+    },
+    "es": {
+      "fetched": 603,
+      "new_items": 249,
+      "kept": 11,
+      "errors": 0
+    },
+    "ja": {
+      "fetched": 332,
+      "new_items": 101,
+      "kept": 7,
+      "errors": 1
+    }
+  }
+}
