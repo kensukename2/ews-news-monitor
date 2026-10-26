@@ -1,0 +1,404 @@
+{
+  "run_id": 18,
+  "started_at": "2026-10-26T04:10:37Z",
+  "status": "partial",
+  "sources": [
+    {
+      "source_id": "gdacs",
+      "language": "en",
+      "fetched": 319,
+      "new_items": 44,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "reliefweb_ew_en",
+      "language": "en",
+      "fetched": 0,
+      "new_items": 0,
+      "kept": 0,
+      "error": "ReadTimeout: HTTPSConnectionPool(host='reliefweb.int', port=443): Read timed out. (read timeout=20)"
+    },
+    {
+      "source_id": "reliefweb_ew_es",
+      "language": "es",
+      "fetched": 20,
+      "new_items": 1,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "preventionweb",
+      "language": "en",
+      "fetched": 40,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "undrr",
+      "language": "en",
+      "fetched": 40,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "wmo_press",
+      "language": "en",
+      "fetched": 12,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "wmo_news",
+      "language": "en",
+      "fetched": 4,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "gdelt_en",
+      "language": "en",
+      "fetched": 45,
+      "new_items": 10,
+      "kept": 8,
+      "error": null
+    },
+    {
+      "source_id": "websearch_en",
+      "language": "en",
+      "fetched": 2,
+      "new_items": 1,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "noaa_news",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "metoffice_news",
+      "language": "en",
+      "fetched": 13,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "pagasa_press",
+      "language": "en",
+      "fetched": 6,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "kmd_news",
+      "language": "en",
+      "fetched": 6,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "icpac_news",
+      "language": "en",
+      "fetched": 6,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "asmc",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 1,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "cimh_rcc",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "bbc_world",
+      "language": "en",
+      "fetched": 32,
+      "new_items": 16,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "bbc_science",
+      "language": "en",
+      "fetched": 41,
+      "new_items": 12,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "inquirer",
+      "language": "en",
+      "fetched": 40,
+      "new_items": 40,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "jma_press",
+      "language": "ja",
+      "fetched": 40,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "nhk_news",
+      "language": "ja",
+      "fetched": 7,
+      "new_items": 7,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "nhk_society",
+      "language": "ja",
+      "fetched": 105,
+      "new_items": 6,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "asahi_news",
+      "language": "ja",
+      "fetched": 40,
+      "new_items": 31,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "mainichi_news",
+      "language": "ja",
+      "fetched": 20,
+      "new_items": 20,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "gdelt_ja",
+      "language": "ja",
+      "fetched": 15,
+      "new_items": 1,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "websearch_ja",
+      "language": "ja",
+      "fetched": 6,
+      "new_items": 1,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "bousai",
+      "language": "ja",
+      "fetched": 30,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "fdma",
+      "language": "ja",
+      "fetched": 30,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "mlit",
+      "language": "ja",
+      "fetched": 15,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "jica_press",
+      "language": "ja",
+      "fetched": 20,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "gdelt_es",
+      "language": "es",
+      "fetched": 23,
+      "new_items": 16,
+      "kept": 9,
+      "error": null
+    },
+    {
+      "source_id": "websearch_es",
+      "language": "es",
+      "fetched": 1,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "aemet_news",
+      "language": "es",
+      "fetched": 10,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "senamhi_pe",
+      "language": "es",
+      "fetched": 25,
+      "new_items": 4,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "inamhi",
+      "language": "es",
+      "fetched": 10,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "imn_cr",
+      "language": "es",
+      "fetched": 21,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "indeci",
+      "language": "es",
+      "fetched": 21,
+      "new_items": 2,
+      "kept": 2,
+      "error": null
+    },
+    {
+      "source_id": "cenepred",
+      "language": "es",
+      "fetched": 25,
+      "new_items": 1,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "ciifen",
+      "language": "es",
+      "fetched": 3,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "elpais_america",
+      "language": "es",
+      "fetched": 109,
+      "new_items": 56,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "elpais_portada",
+      "language": "es",
+      "fetched": 155,
+      "new_items": 54,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "clarin",
+      "language": "es",
+      "fetched": 10,
+      "new_items": 10,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "larepublica_pe",
+      "language": "es",
+      "fetched": 57,
+      "new_items": 24,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "eltiempo_co",
+      "language": "es",
+      "fetched": 10,
+      "new_items": 9,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "biobio_cl",
+      "language": "es",
+      "fetched": 20,
+      "new_items": 20,
+      "kept": 0,
+      "error": null
+    }
+  ],
+  "classify": {
+    "classified": 29,
+    "relevant": 24,
+    "review": 2,
+    "errors": 0,
+    "copied": 0,
+    "left_pending": 0,
+    "budget_stopped": false,
+    "cost_usd": 0.0451
+  },
+  "stories_touched": 17,
+  "fatal_error": null,
+  "budget": {
+    "spent_month_usd": 0.8204,
+    "allowance_run_usd": 0.7044,
+    "monthly_usd": 5.0
+  },
+  "by_language": {
+    "en": {
+      "fetched": 636,
+      "new_items": 124,
+      "kept": 11,
+      "errors": 1
+    },
+    "es": {
+      "fetched": 520,
+      "new_items": 197,
+      "kept": 15,
+      "errors": 0
+    },
+    "ja": {
+      "fetched": 328,
+      "new_items": 66,
+      "kept": 3,
+      "errors": 0
+    }
+  }
+}
