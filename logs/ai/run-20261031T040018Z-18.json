@@ -1,0 +1,340 @@
+{
+  "run_id": 18,
+  "started_at": "2026-10-31T04:00:18Z",
+  "status": "success",
+  "sources": [
+    {
+      "source_id": "wmo_press",
+      "language": "en",
+      "fetched": 12,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "wmo_news",
+      "language": "en",
+      "fetched": 7,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "ecmwf",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "eumetsat",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 1,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "itu_ai4good",
+      "language": "en",
+      "fetched": 500,
+      "new_items": 1,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "preventionweb",
+      "language": "en",
+      "fetched": 40,
+      "new_items": 34,
+      "kept": 2,
+      "error": null
+    },
+    {
+      "source_id": "undrr",
+      "language": "en",
+      "fetched": 40,
+      "new_items": 6,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "reliefweb_ai",
+      "language": "en",
+      "fetched": 20,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "gdelt_en",
+      "language": "en",
+      "fetched": 75,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "websearch_en",
+      "language": "en",
+      "fetched": 1,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "noaa_news",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "metoffice_news",
+      "language": "en",
+      "fetched": 13,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "deepmind",
+      "language": "en",
+      "fetched": 100,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "google_research",
+      "language": "en",
+      "fetched": 100,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "nvidia_blog",
+      "language": "en",
+      "fetched": 18,
+      "new_items": 1,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "msr_blog",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 1,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "eos",
+      "language": "en",
+      "fetched": 15,
+      "new_items": 3,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "phys_earth",
+      "language": "en",
+      "fetched": 30,
+      "new_items": 6,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "theverge_ai",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 10,
+      "kept": 2,
+      "error": null
+    },
+    {
+      "source_id": "hpcwire",
+      "language": "en",
+      "fetched": 10,
+      "new_items": 4,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "bbc_science",
+      "language": "en",
+      "fetched": 42,
+      "new_items": 7,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "jma_press",
+      "language": "ja",
+      "fetched": 40,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "nhk_news",
+      "language": "ja",
+      "fetched": 7,
+      "new_items": 7,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "nhk_society",
+      "language": "ja",
+      "fetched": 125,
+      "new_items": 19,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "nhk_science",
+      "language": "ja",
+      "fetched": 55,
+      "new_items": 12,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "itmedia_ai",
+      "language": "ja",
+      "fetched": 20,
+      "new_items": 8,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "nikkei_xtech",
+      "language": "ja",
+      "fetched": 100,
+      "new_items": 3,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "impress_watch",
+      "language": "ja",
+      "fetched": 20,
+      "new_items": 14,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "gdelt_ja",
+      "language": "ja",
+      "fetched": 3,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "websearch_ja",
+      "language": "ja",
+      "fetched": 5,
+      "new_items": 3,
+      "kept": 3,
+      "error": null
+    },
+    {
+      "source_id": "gdelt_es",
+      "language": "es",
+      "fetched": 41,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "websearch_es",
+      "language": "es",
+      "fetched": 1,
+      "new_items": 0,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "aemet_news",
+      "language": "es",
+      "fetched": 10,
+      "new_items": 1,
+      "kept": 1,
+      "error": null
+    },
+    {
+      "source_id": "senamhi_pe",
+      "language": "es",
+      "fetched": 25,
+      "new_items": 5,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "elpais_tec",
+      "language": "es",
+      "fetched": 21,
+      "new_items": 2,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "xataka",
+      "language": "es",
+      "fetched": 26,
+      "new_items": 26,
+      "kept": 0,
+      "error": null
+    },
+    {
+      "source_id": "elpais_america",
+      "language": "es",
+      "fetched": 126,
+      "new_items": 85,
+      "kept": 0,
+      "error": null
+    }
+  ],
+  "classify": {
+    "classified": 8,
+    "relevant": 3,
+    "review": 1,
+    "errors": 0,
+    "copied": 1,
+    "left_pending": 0,
+    "budget_stopped": false,
+    "cost_usd": 0.0368
+  },
+  "stories_touched": 5,
+  "fatal_error": null,
+  "budget": {
+    "spent_month_usd": 0.6432,
+    "allowance_run_usd": 4.394,
+    "monthly_usd": 5.0
+  },
+  "by_language": {
+    "en": {
+      "fetched": 1073,
+      "new_items": 74,
+      "kept": 5,
+      "errors": 0
+    },
+    "ja": {
+      "fetched": 375,
+      "new_items": 66,
+      "kept": 3,
+      "errors": 0
+    },
+    "es": {
+      "fetched": 250,
+      "new_items": 119,
+      "kept": 1,
+      "errors": 0
+    }
+  }
+}
