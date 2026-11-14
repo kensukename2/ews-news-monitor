@@ -1,0 +1,46 @@
+.updated { margin-bottom: 0.75rem; font-size: 0.9rem; }
+.filters { padding: 1rem; margin-bottom: 0.75rem; }
+.filters .label { margin-bottom: 0.2rem; }
+.filter-actions { display: flex; flex-direction: column; gap: 0.4rem; justify-content: flex-end; }
+.region-tabs { margin-bottom: 1rem !important; }
+.region-tabs ul { flex-wrap: nowrap; }
+.region-tabs a { font-size: 0.9rem; }
+.region-tabs .count { margin-left: 0.35rem; font-size: 0.75rem; color: #7a7a7a; }
+.section-heading { margin: 1.25rem 0 0.75rem !important; }
+
+.story { padding: 1rem 1.1rem; margin-bottom: 0.9rem !important; border-left: 4px solid #d5d5d5; }
+.story.is-new { border-left-color: #1b5fa6; background: #f4f8fd; }
+.story-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; justify-content: space-between; }
+.story-title { font-size: 1.05rem; font-weight: 600; line-height: 1.35; margin: 0; }
+.story-meta { font-size: 0.8rem; color: #6b6b6b; margin: 0.25rem 0 0.5rem; }
+.story-summary { font-size: 0.93rem; margin-bottom: 0.5rem; }
+.story .tags { margin-bottom: 0.35rem !important; }
+.story details { font-size: 0.85rem; margin-top: 0.4rem; }
+.story details summary { cursor: pointer; color: #1b5fa6; }
+.story dl { display: grid; grid-template-columns: max-content 1fr; gap: 0.2rem 0.8rem; margin-top: 0.5rem; }
+.story dt { color: #6b6b6b; }
+.story dd { margin: 0; }
+.original-summary { padding: 0.4rem 0.6rem; background: #f6f6f6; border-radius: 4px; margin-top: 0.4rem; }
+.sources { margin: 0.4rem 0 0 1.1rem; list-style: disc; }
+.sources li { margin-bottom: 0.2rem; word-break: break-word; }
+.lang-badge { font-size: 0.7rem; padding: 0 0.35rem; border-radius: 3px; background: #ececec; color: #444; margin-right: 0.3rem; text-transform: uppercase; }
+
+.tag.outcome-positive { background: #e3f4e8; color: #1d6b35; }
+.tag.outcome-negative { background: #fbe4e4; color: #9d1c1c; }
+.tag.outcome-mixed { background: #fff2d6; color: #7a5300; }
+.tag.outcome-not_reported { background: #efefef; color: #555; }
+.tag.review { background: #fff; border: 1px dashed #b08300; color: #7a5300; }
+
+@media (prefers-color-scheme: dark) {
+  .story { border-left-color: #3a3d44; }
+  .story.is-new { border-left-color: #7fb3ec; background: #18212d; }
+  .story-meta, .story dt { color: #9aa0a6; }
+  .original-summary { background: #22252b; }
+  .lang-badge { background: #2c2f36; color: #ccc; }
+  .story details summary { color: #7fb3ec; }
+  .tag.outcome-positive { background: #173d24; color: #9fe0b2; }
+  .tag.outcome-negative { background: #4a1c1c; color: #f4b0b0; }
+  .tag.outcome-mixed { background: #45360f; color: #f1d58b; }
+  .tag.outcome-not_reported { background: #2c2f36; color: #bbb; }
+  .tag.review { background: transparent; color: #f1d58b; }
+}
