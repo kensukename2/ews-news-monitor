@@ -1,0 +1,32 @@
+# AI products page: names that refer to the same product.
+#
+#   Canonical name shown on the page:
+#     - other name used in articles
+#     - ...
+#
+# Claude already merges versions/variants (e.g. "AIFS ENS" -> "AIFS") and is
+# shown the list of known products, but different articles sometimes still
+# use different names. Add them here, then re-merge without any API cost:
+#   python -m ews_news --topic ai products --no-api
+# (matching ignores upper/lower case, punctuation and "(unnamed)").
+
+Probabilistic Bias Correction (PBC):
+  - PBC
+  - PBC model
+  - Probabilistic Bias Correction
+  - Probabilistic Bias Correction framework
+
+MAZU:
+  - Mazu
+
+AIFS:
+  - ECMWF AIFS
+  - Artificial Intelligence Forecasting System
+
+WeatherNext:
+  - WeatherNext 2
+  - Google WeatherNext
+
+NVIDIA Earth-2:
+  - Earth-2
+  - Earth2

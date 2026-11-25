@@ -84,4 +84,8 @@ def publish(conn, config) -> dict:
         },
     }
     _write(out_dir / "manifest.json", manifest)
+    # Topic-specific extra pages (e.g. AI products), rebuilt from the database.
+    extra = getattr(config.module, "publish_extra", None)
+    if extra:
+        extra(conn, config)
     return manifest

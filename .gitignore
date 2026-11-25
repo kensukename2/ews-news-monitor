@@ -12,6 +12,7 @@ __pycache__/
 state/
 site/ews_news/data/
 site/ai_news/data/
+site/ai_news/products/data/
 
 # OS / editor
 .DS_Store

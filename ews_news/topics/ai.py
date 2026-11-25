@@ -216,3 +216,9 @@ def aggregate(members: list) -> dict:
         "value_added": next((c["value_added"] for c in members if c.get("value_added")), None),
         "value_types": sorted({v for c in members for v in c.get("value_types", [])}),
     }
+
+
+def publish_extra(conn, config):
+    """Also write the AI products page data (built weekly by `products`)."""
+    from ..products import write_json
+    write_json(conn, config)

@@ -11,6 +11,7 @@ Each module (ews.py, ai.py) defines:
     event_key(c, country_names)          clustering key, or None if too vague
     candidate_ok(c, story)               can this article belong to this existing story?
     aggregate(members)                   topic-specific story fields from its articles
+    publish_extra(conn, config)          optional: write extra page data (AI: products)
 
 Everything else (collection, pre-filter, budget, clustering, publishing) is
 shared and lives in the ews_news package.

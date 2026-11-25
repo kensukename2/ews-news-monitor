@@ -11,6 +11,8 @@ Without --topic, commands apply to every topic in config/topics/ (ews, ai).
     python -m ews_news recluster --use-claude   # ... asking Claude about unclear matches (small cost)
     python -m ews_news report              # last run summary and spending
     python -m ews_news check-sources       # test every feed / list page
+    python -m ews_news --topic ai products            # weekly AI products assessment
+    python -m ews_news --topic ai products --no-api   # only re-merge/re-publish (e.g. after editing aliases)
     python -m ews_news daily-gate          # exit 0 if it is >= 05:00 Zurich and no run yet today (CI)
 """
 
@@ -43,6 +45,9 @@ def main(argv=None):
     rc = sub.add_parser("recluster")
     rc.add_argument("--use-claude", action="store_true")
     sub.add_parser("report")
+    pr = sub.add_parser("products", help="AI products / implementation status (topic ai)")
+    pr.add_argument("--no-api", action="store_true", help="no Claude calls: re-merge and publish only")
+    pr.add_argument("--limit", type=int, default=200, help="max. new articles to analyse in this run")
     cs = sub.add_parser("check-sources")
     cs.add_argument("--all", action="store_true", help="include disabled sources")
     g = sub.add_parser("daily-gate")
@@ -106,6 +111,21 @@ def main(argv=None):
             m = publish.publish(conn, config)
             db.dump(conn, config.path("db_dump"))
             print(f"rebuilt {n} stories; published {m['total_stories']}")
+        elif args.cmd == "products":
+            if not hasattr(config.module, "publish_extra"):
+                print("(no products page for this topic)")
+            else:
+                import os
+                import anthropic
+                from . import products
+                from .budget import Budget
+                products.ensure_tables(conn)
+                client = (anthropic.Anthropic() if os.environ.get("ANTHROPIC_API_KEY")
+                          and not args.no_api else None)
+                stats = products.run_weekly(conn, config, Budget(conn, config.settings), client,
+                                            limit=args.limit)
+                db.dump(conn, config.path("db_dump"))
+                print(json.dumps(stats, ensure_ascii=False, indent=2))
         elif args.cmd == "report":
             last = conn.execute("SELECT * FROM runs ORDER BY id DESC LIMIT 1").fetchone()
             month = datetime.utcnow().strftime("%Y-%m-01")
