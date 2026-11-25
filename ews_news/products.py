@@ -338,7 +338,9 @@ def product_key(name: str, developer) -> str:
         return _key(name)
     base = re.sub(r"\(unnamed\)", "", name).strip()
     m = re.match(r"^(.*\S)\s*\(([^()]*)\)\s*$", base)
-    if m and _dev_words(m.group(2)) & _dev_words(developer):
+    if m and not developer:
+        base, developer = m.group(1), m.group(2)       # the bracket names the developer
+    elif m and _dev_words(m.group(2)) & _dev_words(developer):
         base = m.group(1)
     return f"{_key(base)} | {' '.join(sorted(_dev_words(developer))[:3])}".rstrip(" |")
 
