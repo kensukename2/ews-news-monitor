@@ -165,3 +165,18 @@ def test_unnamed_with_and_without_developer_bracket_merge(ai_config):
     add_article(conn, ai_config, "https://e/1", [a])
     add_article(conn, ai_config, "https://e/2", [b])
     assert products.aggregate(conn, ai_config) == 1
+
+
+def test_merge_to_unnamed_canonical_uses_same_key(ai_config):
+    conn = db.connect(ai_config.path("database"))
+    canon = "AI typhoon model (unnamed) (Weathernews)"
+    a = dict(mention(canon, "operational", "private_sector", "Weathernews", named=False), developer="Weathernews")
+    b = dict(mention("Typhoon AI by WNI (unnamed)", "operational", "private_sector", "Weathernews",
+                     named=False), developer="Weathernews Inc.")
+    c = dict(mention("AI typhoon model (unnamed)", "operational", "private_sector", "Weathernews",
+                     named=False), developer="Weathernews Inc.")
+    for i, m in enumerate([a, b, c]):
+        add_article(conn, ai_config, f"https://f/{i}", [m])
+    conn.execute("INSERT INTO product_merges (variant_key, canonical, decided_at) VALUES (?,?,?)",
+                 (products._key("Typhoon AI by WNI (unnamed)"), canon, NOW))
+    assert products.aggregate(conn, ai_config) == 1

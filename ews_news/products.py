@@ -329,6 +329,20 @@ def _unnamed_into_named(products: dict) -> dict:
     return out
 
 
+def product_key(name: str, developer) -> str:
+    """Identifier of a product. Named products: the normalised name. Unnamed ones
+    ("AI flood model (unnamed)") are generic descriptions, so the key also contains the
+    developer (and ignores a bracket that only repeats it, "... (unnamed) (Weathernews)"),
+    keeping the same description by different developers apart."""
+    if "unnamed" not in (name or "").lower():
+        return _key(name)
+    base = re.sub(r"\(unnamed\)", "", name).strip()
+    m = re.match(r"^(.*\S)\s*\(([^()]*)\)\s*$", base)
+    if m and _dev_words(m.group(2)) & _dev_words(developer):
+        base = m.group(1)
+    return f"{_key(base)} | {' '.join(sorted(_dev_words(developer))[:3])}".rstrip(" |")
+
+
 def _strip_developer(name: str, developer) -> str:
     """'PBC (Massachusetts Institute of Technology)' -> 'PBC' when the bracket repeats the
     developer. Unnamed products keep it: it is what tells them apart."""
@@ -353,17 +367,10 @@ def aggregate(conn, config, _story_merges=None) -> int:
         for p in db.loads(r["mentions"])["products"]:
             p["name"] = _strip_developer(p["name"], p.get("developer"))
             canonical = aliases.get(_key(p["name"]))
-            key = _key(canonical or p["name"])
-            if not canonical and not p["is_named"]:
-                # Generic descriptions ("AI flood model (unnamed)") of different developers
-                # must not merge: qualify the key with the developer (and drop a bracket
-                # that only repeats the developer, e.g. "... (unnamed) (Weathernews)").
-                m = re.match(r"^(.*\S)\s*\(([^()]*)\)\s*$", re.sub(r"\(unnamed\)", "", p["name"]).strip())
-                base = m.group(1) if m and _dev_words(m.group(2)) & _dev_words(p.get("developer")) else p["name"]
-                key = f"{_key(base)} | {' '.join(sorted(_dev_words(p.get('developer')))[:3])}".rstrip(" |")
+            key = product_key(canonical or p["name"], p.get("developer"))
             if _story_merges and key in _story_merges:       # unnamed -> named (same news story)
                 canonical = _story_merges[key]
-                key = _key(canonical)
+                key = product_key(canonical, p.get("developer"))
             for a in p.get("aliases") or []:
                 if _key(a) in alias_to_key and not canonical:
                     key = alias_to_key[_key(a)]
