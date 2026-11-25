@@ -5,6 +5,7 @@
 #   1. update the code from GitHub (main branch)
 #   2. update the saved state (data branch, checked out in state/)
 #   3. run the pipeline for all topics (EWS News, AI News)
+#      on Mondays also: AI products implementation-status assessment
 #   4. save the new state to the data branch
 #   5. publish the site to the gh-pages branch (served at knaito.xyz)
 #
@@ -30,6 +31,13 @@ log "running pipeline"
 status=$?
 log "pipeline finished with exit code $status"
 
+# Weekly (Mondays, Swiss time): AI products / implementation status page.
+# Set WEEKLY_PRODUCTS=1 to force it on another day.
+if [ "$(TZ=Europe/Zurich date +%u)" = "1" ] || [ "${WEEKLY_PRODUCTS:-0}" = "1" ]; then
+  log "weekly AI products assessment"
+  .venv/bin/python -m ews_news --topic ai products || log "WARNING: AI products assessment failed"
+fi
+
 log "saving state to the data branch"
 rm -f state/published/*.json
 for page in ews_news ai_news; do
@@ -38,6 +46,10 @@ for page in ews_news ai_news; do
     cp -r "site/$page/data/." "state/published/$page/"
   fi
 done
+if [ -f site/ai_news/products/data/products.json ]; then
+  mkdir -p state/published/ai_news/products
+  cp site/ai_news/products/data/products.json state/published/ai_news/products/
+fi
 (
   cd state
   git add -A

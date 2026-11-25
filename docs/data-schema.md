@@ -125,3 +125,39 @@ its status), `classifications` (Claude's structured output per item, JSON in
 database (and therefore its own budget). The daily job saves text dumps
 `ews.sql` and `ai.sql` on the `data` branch; it can be loaded into PostgreSQL
 with minor edits.
+
+## AI products page (`site/ai_news/products/data/products.json`)
+
+Built weekly (Mondays) by `python -m ews_news --topic ai products` from the AI
+News archive, and rewritten from the database by every normal publish.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `generated_at` | string | When the file was written (UTC). |
+| `last_assessed_at`, `last_assessed_local` | string | Last time new articles were analysed (UTC / Zurich). |
+| `articles_analysed` | int | Number of AI News articles analysed so far. |
+| `status_labels` | object | `{"1": "Fully operational at NMHS / WMO centre", "2": "Testing / pre-operational", "3": "Research phase with real-world potential", "4": "Released, not yet tested or implemented at NMHS"}` |
+| `counts` | object | Number of products per status. |
+| `products` | list | One entry per product (below), sorted by status (1, 2, 4, 3) then number of articles. |
+
+Each product:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `key` | string | Normalised name (stable identifier). |
+| `name`, `aliases` | string, list | Display name and other names found in articles. |
+| `is_named` | bool | `false` for systems without a product name (shown as "… (unnamed)"). |
+| `developer`, `developer_type` | string | Who built it; type as for AI News institutions. |
+| `product_type` | string | `weather_model`, `nowcasting`, `subseasonal_climate`, `post_processing`, `observation_data`, `hydrology_flood`, `warning_impact`, `decision_support`, `llm_assistant`, `other`. |
+| `areas` | list | Areas of operation (as on AI News). |
+| `released` | bool | Launched, available, open-sourced or used operationally by anyone. |
+| `deployments` | list | `{"institution", "short_name", "type", "country", "stage", "eligible", "last_date"}`; `stage` is `operational`, `testing`, `planned` or `research` (most advanced stage found per institution); `eligible` = NMHS or WMO centre. |
+| `status`, `status_label` | int, string | 1 operational at an eligible institution; 2 testing at an eligible institution; 4 released / used by others but not tested at an eligible institution; 3 research. The most advanced stage wins. |
+| `status_basis` | string | Short reason, e.g. "Tested by ECMWF and KMSA since Oct 2026; no operational use yet". |
+| `assessment` | string | 2–3 sentence assessment written from the evidence (regenerated when new evidence arrives). |
+| `first_mentioned`, `last_mentioned`, `n_articles` | | Dates (`YYYY-MM-DD`) and number of evidence articles. |
+| `evidence` | list | `{"story_id", "date", "title", "title_en", "url", "source_name", "language", "summary_en"}`, newest first. |
+
+Names that refer to the same product can be merged in
+`config/topics/ai/product_aliases.yaml`; apply with
+`python -m ews_news --topic ai products --no-api` (no API cost).

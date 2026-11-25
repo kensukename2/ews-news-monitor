@@ -12,6 +12,12 @@ Collects news every day and publishes two pages on **https://knaito.xyz**:
   guidance, hydrology, warnings, communication, climate services and
   operations), including new AI model releases. Grouped by area of operation.
 
+  An **[AI products](https://knaito.xyz/ai_news/products/)** page, updated
+  weekly (Mondays), lists the AI products and services mentioned in the AI
+  News archive with their implementation status: 1 operational at an NMHS or
+  WMO centre, 2 testing / pre-operational, 3 research with real-world
+  potential, 4 released but not yet tested or implemented at an NMHS.
+
 Sources are in English, Japanese and Spanish (more languages can be added
 through configuration). Articles are classified and summarised with the
 Claude API (Claude Haiku); only titles, short summaries and links are
@@ -49,6 +55,13 @@ collect ──► pre-filter ──► classify (Claude) ──► cluster into 
 5. **Store** in SQLite (`state/ews.sqlite`, `state/ai.sqlite`), designed to
    move to PostgreSQL.
 6. **Publish** static JSON for the page (`docs/data-schema.md`).
+7. **Weekly AI products assessment** (`ews_news/products.py`, Mondays): each new
+   AI News article is analysed once for the AI products it mentions and their
+   stage at each institution; products are merged (same names, aliases in
+   `config/topics/ai/product_aliases.yaml`, unnamed systems in the same news
+   story as a named product, plus a weekly Claude duplicate check); the
+   status follows the rule above (most advanced stage wins) and a short
+   assessment is written per product. About $0.03 per week.
 
 ## Costs
 
@@ -82,6 +95,7 @@ cp .env.example .env        # then put your Anthropic API key in .env
 .venv/bin/python -m ews_news check-sources --all  # test every feed / list page
 .venv/bin/python -m ews_news report               # last run and this month's spending
 .venv/bin/python -m ews_news recluster            # rebuild stories after changing cluster settings
+.venv/bin/python -m ews_news --topic ai products  # AI products assessment (weekly on the server)
 .venv/bin/python -m pytest                        # tests
 ```
 
@@ -150,6 +164,8 @@ Hetzner server (05:00 Europe/Zurich)                     GitHub
 ssh knaitocap
 systemctl list-timers ews-news.timer          # next scheduled run
 sudo systemctl start ews-news.service         # run now (takes ~15-25 min)
+sudo systemctl set-environment WEEKLY_PRODUCTS=1 && sudo systemctl start ews-news.service \
+  && sudo systemctl unset-environment WEEKLY_PRODUCTS   # run now incl. the weekly AI products step
 journalctl -u ews-news.service -n 100         # log of the latest runs
 sudo -u ewsnews -H /opt/ews-news-monitor/.venv/bin/python -m ews_news report   # spending
 ```
