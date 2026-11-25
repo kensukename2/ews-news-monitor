@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Products Status | knaito.xyz</title>
+  <meta name="description" content="AI products and services mentioned in the AI News archive, with their implementation status at NMHSs and WMO centres. Updated weekly.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+  <link rel="stylesheet" href="../../site.css">
+  <link rel="stylesheet" href="../../assets/news.css">
+</head>
+<body>
+<div class="page-wrapper">
+  <header class="site-header">
+    <div class="container">
+      <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+          <a class="navbar-item site-brand" href="/">knaito.xyz</a>
+          <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="site-menu">
+            <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+          </a>
+        </div>
+        <div id="site-menu" class="navbar-menu">
+          <div class="navbar-start">
+            <a class="navbar-item" href="/">Home</a>
+            <a class="navbar-item" href="/ews_news/">EWS News</a>
+            <a class="navbar-item is-active" href="/ai_news/">AI News</a>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="section pt-5">
+    <div class="container">
+      <div class="tabs page-tabs"><ul>
+        <li><a href="/ai_news/">News stories</a></li>
+        <li class="is-active"><a href="/ai_news/products/">AI products &amp; implementation status</a></li>
+      </ul></div>
+
+      <h1 class="title is-3">AI Products and Services: Implementation Status</h1>
+      <p class="subtitle is-6">AI products and services mentioned in the AI News archive, assessed for how far they are implemented at National Meteorological and Hydrological Services (NMHSs) and WMO centres (e.g. ECMWF, RSMCs, Regional Climate Centres, EUMETSAT).</p>
+
+      <p class="updated">Last assessed: <strong id="last-updated">…</strong> <span class="has-text-grey">(Europe/Zurich; updated weekly on Mondays) · based on <span id="articles-analysed">…</span> articles</span></p>
+      <div id="status-banner"></div>
+
+      <div class="columns is-multiline is-variable is-2 mb-1" id="summary"></div>
+
+      <form class="box filters" id="filters" autocomplete="off">
+        <div class="columns is-multiline is-variable is-2">
+          <div class="column is-12-mobile is-6-tablet is-4-desktop">
+            <label class="label is-small" for="f-search">Search</label>
+            <input class="input is-small" type="search" id="f-search" placeholder="e.g. AIFS, nowcasting, JMA">
+          </div>
+          <div class="column is-6-mobile is-4-tablet is-2-desktop"><label class="label is-small" for="f-area">Area</label><div class="select is-small is-fullwidth"><select id="f-area"></select></div></div>
+          <div class="column is-6-mobile is-4-tablet is-2-desktop"><label class="label is-small" for="f-type">Product type</label><div class="select is-small is-fullwidth"><select id="f-type"></select></div></div>
+          <div class="column is-6-mobile is-4-tablet is-2-desktop"><label class="label is-small" for="f-dev">Developer</label><div class="select is-small is-fullwidth"><select id="f-dev"></select></div></div>
+          <div class="column is-12-mobile is-12-tablet is-2-desktop filter-actions">
+            <label class="checkbox is-size-7"><input type="checkbox" id="f-unnamed" checked> Include unnamed systems</label>
+            <button type="reset" class="button is-small is-light">Reset filters</button>
+          </div>
+        </div>
+      </form>
+      <p class="result-count has-text-grey is-size-7" id="result-count"></p>
+
+      <div class="table-container">
+        <table class="table is-fullwidth is-hoverable products-table">
+          <thead><tr>
+            <th></th><th>Product / developer</th><th>Status</th><th>Implementations (institution: stage)</th>
+            <th>Type / area</th><th>Articles / last mention</th>
+          </tr></thead>
+          <tbody id="product-rows"></tbody>
+        </table>
+      </div>
+      <div id="loading" class="has-text-grey has-text-centered py-6">Loading products…</div>
+
+      <div class="content is-size-7 has-text-grey mt-5">
+        <p><strong>How the status is determined.</strong> Every week, each new AI News article is analysed once by the Claude API, which lists the AI products or services it mentions, their developer, and which institutions use them at which stage (operational, testing, research, planned). Per product, the most advanced stage wins:
+          <strong>1</strong> operational at an NMHS or WMO centre;
+          <strong>2</strong> tested or pre-operational at an NMHS or WMO centre;
+          <strong>4</strong> released (or used by companies, universities or others) but not yet tested at an NMHS or WMO centre;
+          <strong>3</strong> research or prototype with real-world potential.
+          Institutions in <strong>bold</strong> are NMHSs or WMO centres. The assessment text is generated from the linked articles only and may contain errors; please check the sources.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container has-text-centered is-size-7">
+      Automatically assessed with the Claude API from published news; always check the original sources. · <a href="https://github.com/kensukename2/ews-news-monitor">Source code</a>
+    </div>
+  </footer>
+</div>
+<script src="../../site.js"></script>
+<script src="../../assets/products.js"></script>
+</body>
+</html>
