@@ -142,3 +142,15 @@ def test_unnamed_product_merged_into_named_one_in_same_story(ai_config):
     assert products.aggregate(conn, ai_config) == 2
     names = {p["name"]: p["n_articles"] for p in products.write_json(conn, ai_config)["products"]}
     assert names == {"Probabilistic Bias Correction (PBC)": 2, "Other flood AI (unnamed)": 1}
+
+
+def test_developer_brackets_and_unnamed_keys(ai_config):
+    assert products._strip_developer("PBC (Massachusetts Institute of Technology)",
+                                     "MIT and Massachusetts Institute of Technology") == "PBC"
+    assert products._strip_developer("AI typhoon model (unnamed) (JMA)", "JMA") == "AI typhoon model (unnamed) (JMA)"
+    conn = db.connect(ai_config.path("database"))
+    a = mention("AI flood model (unnamed)", "research", "research", "UCL", named=False)
+    b = dict(mention("AI flood model (unnamed)", "research", "research", "ETH", named=False), developer="ETH Zurich")
+    add_article(conn, ai_config, "https://d/1", [a])
+    add_article(conn, ai_config, "https://d/2", [b])
+    assert products.aggregate(conn, ai_config) == 2        # different developers stay separate

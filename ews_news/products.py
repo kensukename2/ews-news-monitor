@@ -228,7 +228,7 @@ def load_aliases(config, conn=None) -> dict:
 
 def _known_products(conn, limit=150) -> list:
     rows = conn.execute("SELECT data_json FROM products ORDER BY updated_at DESC LIMIT ?", (limit,))
-    return [f"{p['name']} ({p.get('developer') or '?'})" for p in (db.loads(r[0]) for r in rows)]
+    return [f"{p['name']}  [developer: {p.get('developer') or '?'}]" for p in (db.loads(r[0]) for r in rows)]
 
 
 def articles_to_analyse(conn) -> list:
@@ -329,10 +329,18 @@ def _unnamed_into_named(products: dict) -> dict:
     return out
 
 
+def _strip_developer(name: str, developer) -> str:
+    """'PBC (Massachusetts Institute of Technology)' -> 'PBC' when the bracket repeats the
+    developer. Unnamed products keep it: it is what tells them apart."""
+    m = re.match(r"^(.*\S)\s*\(([^()]*)\)\s*$", name or "")
+    if not m or "unnamed" in name.lower():
+        return name
+    return m.group(1) if _dev_words(m.group(2)) & _dev_words(developer) else name
+
+
 def aggregate(conn, config, _story_merges=None) -> int:
     """Rebuild the products table from all mentions (no API calls)."""
     aliases = load_aliases(config, conn)
-    aliases.update(_story_merges or {})
     rows = conn.execute(
         "SELECT m.item_id, m.data_json AS mentions, i.title, i.url, i.source_name, i.language, "
         "i.published_at, i.collected_at, i.story_id, c.data_json AS cls FROM product_mentions m "
@@ -343,8 +351,16 @@ def aggregate(conn, config, _story_merges=None) -> int:
     for r in rows:
         cls = db.loads(r["cls"])
         for p in db.loads(r["mentions"])["products"]:
+            p["name"] = _strip_developer(p["name"], p.get("developer"))
             canonical = aliases.get(_key(p["name"]))
             key = _key(canonical or p["name"])
+            if not canonical and not p["is_named"]:
+                # Generic descriptions ("AI flood model (unnamed)") of different developers
+                # must not merge: qualify the key with the developer.
+                key = f"{key} | {' '.join(sorted(_dev_words(p.get('developer')))[:3])}".rstrip(" |")
+            if _story_merges and key in _story_merges:       # unnamed -> named (same news story)
+                canonical = _story_merges[key]
+                key = _key(canonical)
             for a in p.get("aliases") or []:
                 if _key(a) in alias_to_key and not canonical:
                     key = alias_to_key[_key(a)]
