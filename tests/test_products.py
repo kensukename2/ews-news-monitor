@@ -154,3 +154,14 @@ def test_developer_brackets_and_unnamed_keys(ai_config):
     add_article(conn, ai_config, "https://d/1", [a])
     add_article(conn, ai_config, "https://d/2", [b])
     assert products.aggregate(conn, ai_config) == 2        # different developers stay separate
+
+
+def test_unnamed_with_and_without_developer_bracket_merge(ai_config):
+    conn = db.connect(ai_config.path("database"))
+    a = dict(mention("AI typhoon model (unnamed) (Weathernews)", "operational", "private_sector", "Weathernews",
+                     named=False), developer="Weathernews")
+    b = dict(mention("AI typhoon model (unnamed)", "operational", "private_sector", "Weathernews",
+                     named=False), developer="Weathernews Inc.")
+    add_article(conn, ai_config, "https://e/1", [a])
+    add_article(conn, ai_config, "https://e/2", [b])
+    assert products.aggregate(conn, ai_config) == 1
